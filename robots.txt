@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Block access to dev/archive folders
+Disallow: /stash/
+
+Sitemap: https://azolute.one/sitemap.xml

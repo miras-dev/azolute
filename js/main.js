@@ -19,7 +19,7 @@ $(function () {
 
     ***************************/
     const options = {
-        containers: ['#swupMain', '#swupMenu'],
+        containers: ['#swupMain'],
         animateHistoryBrowsing: true,
         linkSelector: 'a:not([data-no-swup])',
         animationSelector: '[class="mil-main-transition"]'
