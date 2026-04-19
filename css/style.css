@@ -4836,3 +4836,60 @@ html.is-animating .mil-menu-frame {
   -webkit-transition-delay: 0.3s;
   transition-delay: 0.3s;
 }
+
+/* ============================================
+   LOGO — two versions, shown/hidden by context
+   ============================================ */
+
+/* Sizing */
+.mil-logo-dark,
+.mil-logo-light {
+  height: 66px;
+  width: auto;
+}
+
+.mil-logo-footer {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+/* Default (light-background pages): show dark logo */
+.mil-logo-dark {
+  display: block;
+}
+
+.mil-logo-light {
+  display: none;
+}
+
+/* Menu overlay (always dark): flip to light logo */
+.mil-menu-frame .mil-frame-top .mil-logo-dark {
+  display: none;
+}
+
+.mil-menu-frame .mil-frame-top .mil-logo-light {
+  display: block;
+}
+
+/* Mobile header bar (always dark): flip to light logo.
+   "html" prefix raises specificity to (0,3,1) so it reliably
+   beats the default .mil-logo-dark {display:block} (0,1,0) rule. */
+@media screen and (max-width: 1200px) {
+  html .mil-frame .mil-frame-top .mil-logo-dark {
+    display: none;
+  }
+
+  html .mil-frame .mil-frame-top .mil-logo-light {
+    display: block;
+  }
+}
+
+/* Homepage desktop — dark hero behind the fixed logo */
+body.page-dark-hero .mil-frame .mil-frame-top .mil-logo-dark {
+  display: none;
+}
+
+body.page-dark-hero .mil-frame .mil-frame-top .mil-logo-light {
+  display: block;
+}

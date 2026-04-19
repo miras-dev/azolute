@@ -26,12 +26,22 @@
     function getActivePage() {
         var file = window.location.pathname.split('/').pop() || 'index.html';
         if (!file || file === 'index.html') return 'home';
-        if (file === 'about.html')                              return 'about';
+        if (file === 'about.html')                               return 'about';
         if (file === 'services.html' || file === 'service.html') return 'services';
-        if (file.indexOf('portfolio') === 0 || file.indexOf('project') === 0) return 'case-studies';
+        // Match case-studies index and all individual case study slugs
+        var caseStudySlugs = [
+            'case-studies.html',
+            'ai-chatbot-retail.html',
+            'workflow-automation-real-estate.html',
+            'website-chatbot-healthcare.html',
+            'crm-automation-ecommerce.html',
+            'lead-capture-bot-consulting.html',
+            'ai-support-agent-saas.html'
+        ];
+        if (caseStudySlugs.indexOf(file) !== -1) return 'case-studies';
         if (file === 'blog.html' || file === 'blog-inner.html') return 'blog';
-        if (file === 'contact.html')                            return 'contact';
-        if (file === 'publication.html')                        return 'publication';
+        if (file === 'contact.html')                             return 'contact';
+        if (file === 'publication.html')                         return 'publication';
         return '';
     }
 
