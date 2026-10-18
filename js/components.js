@@ -65,13 +65,6 @@
                 '<li><a href="services.html">All Services</a></li>' +
                 '<li><a href="service.html">Web Development</a></li>' +
                 '</ul></li>' +
-            li('case-studies', 'Case Studies', '#.',            'mil-has-children') +
-                '<ul>' +
-                '<li><a href="case-studies.html">All Projects</a></li>' +
-                '<li><a href="ai-chatbot-retail.html">AI Chatbot</a></li>' +
-                '<li><a href="workflow-automation-real-estate.html">Workflow Automation</a></li>' +
-                '</ul></li>' +
-            li('blog',         'Blog',         'blog.html')     + '</li>' +
             li('contact',      'Contact',      'contact.html')  + '</li>' +
             '</ul>'
         );
@@ -90,8 +83,6 @@
             li('home',         'Home',         'index.html')       +
             li('about',        'About',        'about.html')       +
             li('services',     'Services',     'services.html')    +
-            li('case-studies', 'Case Studies', 'case-studies.html') +
-            li('blog',         'Blog',         'blog.html')        +
             li('contact',      'Contact',      'contact.html')     +
             '</ul>'
         );
