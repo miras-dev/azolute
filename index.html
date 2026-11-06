@@ -97,136 +97,146 @@
 
     <div id="site-header"></div>
 
-    <main id="main">
+    <!-- scroll-story scene (fixed behind the page) -->
+    <canvas id="storyCanvas" class="story-canvas" aria-hidden="true"></canvas>
 
-        <!-- Hero -->
-        <section class="hero">
+    <!-- chapter progress rail -->
+    <nav class="story-rail" aria-label="Story chapters">
+        <a href="#ch-discover"><span>Discover</span></a>
+        <a href="#ch-idea"><span>The idea</span></a>
+        <a href="#ch-scope"><span>Scope</span></a>
+        <a href="#ch-build"><span>Build</span></a>
+        <a href="#ch-launch"><span>Launch</span></a>
+        <a href="#ch-care"><span>We stay</span></a>
+    </nav>
+
+    <main id="main" class="story-content">
+
+        <!-- Hero / chapter 0 -->
+        <section class="hero" data-formation="0">
             <div class="hero-bg" aria-hidden="true">
                 <div class="orb orb-1"></div>
                 <div class="orb orb-2"></div>
-                <canvas class="scene-canvas" data-scene="full"></canvas>
             </div>
             <div class="container">
                 <span class="eyebrow">Websites · Software · AI Automation</span>
                 <h1>Automate your business.<br>
                     <span class="word-rotate" data-words='["Grow intelligently.","Automate the busywork.","Scale with systems."]'><span class="word grad-text">Grow intelligently.</span></span>
                 </h1>
-                <p class="lead">Azolute AI builds websites and custom software around the way your business works — so your team spends less time on manual work and more time on customers.</p>
+                <p class="lead">This page is the story of working with Azolute — from the moment we first notice your business to long after your project ships.</p>
                 <div class="btn-row">
                     <a href="services.html" class="btn" onclick="gtag('event', 'cta_click', {'button_label': 'Our Services'})"><span>Explore our services</span><span class="arrow">&rarr;</span></a>
                     <a href="contact.html" class="btn btn-ghost"><span>Get in touch</span></a>
                 </div>
-                <ul class="hero-points">
-                    <li>Built around your existing tools</li>
-                    <li>Focused, agreed project scope</li>
-                    <li>Remote — serving clients worldwide</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Services -->
-        <section class="section section-soft" id="services">
-            <div class="container">
-                <div class="section-head reveal">
-                    <span class="eyebrow">What we do</span>
-                    <h2>Smart systems. <span class="grad-text">Useful software.</span></h2>
-                    <p class="lead">Websites, applications and practical software for your business — each project shaped around a specific, agreed outcome.</p>
-                </div>
-                <div class="card-grid">
-                    <a href="services.html#web" class="card reveal">
-                        <span class="card-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 6.5h.01M10 6.5h.01"/></svg>
-                        </span>
-                        <h3>Website Design &amp; Development</h3>
-                        <p>Website design and development shaped around your content, customers and business requirements.</p>
-                        <span class="card-link">Learn more <span aria-hidden="true">&rarr;</span></span>
-                    </a>
-                    <a href="services.html#chatbot" class="card reveal" data-delay="1">
-                        <span class="card-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/><path d="M9 11h.01M13 11h.01M17 11h.01"/></svg>
-                        </span>
-                        <h3>AI Chatbot Integration</h3>
-                        <p>A custom chatbot scoped to answer approved questions, collect enquiry details and hand conversations to your team.</p>
-                        <span class="card-link">Learn more <span aria-hidden="true">&rarr;</span></span>
-                    </a>
-                    <a href="services.html#automation" class="card reveal" data-delay="2">
-                        <span class="card-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11"/><path d="M12 4l3 3-3 3"/><path d="M20 17H9"/><path d="M12 14l-3 3 3 3"/></svg>
-                        </span>
-                        <h3>AI Workflow Automation</h3>
-                        <p>Custom integrations that connect your existing tools and cut out repeated manual steps where the process suits it.</p>
-                        <span class="card-link">Learn more <span aria-hidden="true">&rarr;</span></span>
-                    </a>
-                    <a href="services.html#support" class="card reveal" data-delay="3">
-                        <span class="card-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21"/></svg>
-                        </span>
-                        <h3>Ongoing Support &amp; Optimisation</h3>
-                        <p>Maintenance, changes and support agreed as part of the project scope — so the system keeps working as your business changes.</p>
-                        <span class="card-link">Learn more <span aria-hidden="true">&rarr;</span></span>
-                    </a>
+                <div class="scroll-cue">
+                    <span class="cue-arrow" aria-hidden="true">&darr;</span>
+                    <span>Scroll to begin the story</span>
                 </div>
             </div>
         </section>
 
-        <!-- Process -->
-        <section class="section">
-            <div class="container">
-                <div class="section-head reveal">
-                    <span class="eyebrow">How we work</span>
-                    <h2>A clear path from first call to launch</h2>
-                    <p class="lead">We start by understanding your business and the tools you already use, then agree a focused scope before any work begins.</p>
-                </div>
-                <div class="steps">
-                    <div class="step reveal">
-                        <h3>Understand</h3>
-                        <p>We learn how your business runs today — your customers, your tools and where time is being lost.</p>
-                    </div>
-                    <div class="step reveal" data-delay="1">
-                        <h3>Scope</h3>
-                        <p>Together we agree a focused scope, timeline and price before anything is built. No surprises.</p>
-                    </div>
-                    <div class="step reveal" data-delay="2">
-                        <h3>Build</h3>
-                        <p>We design and build the website, software or automation — and keep you involved along the way.</p>
-                    </div>
-                    <div class="step reveal" data-delay="3">
-                        <h3>Support</h3>
-                        <p>Launch, handover and any ongoing support arrangements are agreed as part of the project.</p>
+        <!-- Chapter 1 — Discover -->
+        <section class="chapter" id="ch-discover" data-formation="1">
+            <div class="chapter-panel">
+                <div class="container">
+                    <div class="chapter-card reveal">
+                        <span class="chapter-step"><span class="n">01</span><span class="l">Discover</span></span>
+                        <h2>We study your business first</h2>
+                        <p>Before we ever say hello, we look at how your business actually runs — your website, your booking flow, your reviews, the places customers find you. We only reach out when we can see a real opportunity.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Founder -->
-        <section class="section section-soft">
-            <div class="container">
-                <div class="founder">
-                    <div class="founder-mark reveal" aria-hidden="true">
-                        <span class="mark">Az.</span>
-                    </div>
-                    <div class="reveal" data-delay="1">
-                        <span class="eyebrow">About Azolute</span>
-                        <h2>Meet Miras</h2>
-                        <p class="muted">Miras is a software developer from Kerala and the founder of Azolute AI. Azolute offers website development and custom software, with each project shaped around the business and its existing tools.</p>
-                        <blockquote class="quote">Websites and software built around the way your business works.</blockquote>
-                        <div class="btn-row" style="margin-top: 2rem;">
-                            <a href="about.html" class="btn btn-ghost"><span>More about Azolute</span></a>
-                            <a href="contact.html" class="btn"><span>Discuss your project</span><span class="arrow">&rarr;</span></a>
-                        </div>
+        <!-- Chapter 2 — The idea -->
+        <section class="chapter right" id="ch-idea" data-formation="2">
+            <div class="chapter-panel">
+                <div class="container">
+                    <div class="chapter-card reveal">
+                        <span class="chapter-step"><span class="n">02</span><span class="l">The idea</span></span>
+                        <h2>You get one specific idea</h2>
+                        <p>No generic pitches. One concrete way a website, booking system or automation would grow your revenue or save your hours — explained in your terms. If it&rsquo;s not relevant, that&rsquo;s the end of it.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- CTA -->
-        <section class="section">
+        <!-- Chapter 3 — Scope -->
+        <section class="chapter" id="ch-scope" data-formation="3">
+            <div class="chapter-panel">
+                <div class="container">
+                    <div class="chapter-card reveal">
+                        <span class="chapter-step"><span class="n">03</span><span class="l">Scope</span></span>
+                        <h2>We scope it together</h2>
+                        <p>A 15-minute call. We map the tools you already use, then agree exactly what will be built, how it will be delivered and what it costs — before any work begins. No surprises.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 4 — Build -->
+        <section class="chapter right" id="ch-build" data-formation="4">
+            <div class="chapter-panel">
+                <div class="container">
+                    <div class="chapter-card reveal">
+                        <span class="chapter-step"><span class="n">04</span><span class="l">Build</span></span>
+                        <h2>We build around your business</h2>
+                        <p>Websites with direct bookings. QR opt-ins that turn walk-ins into regulars. AI agents answering enquiries around the clock. Automations that remove the busywork.</p>
+                        <ul class="tag-list">
+                            <li>Websites</li>
+                            <li>Booking systems</li>
+                            <li>AI support agents</li>
+                            <li>n8n automations</li>
+                        </ul>
+                        <p class="proof">10+ websites, 5+ apps and 3+ products delivered end to end.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 5 — Launch -->
+        <section class="chapter" id="ch-launch" data-formation="5">
+            <div class="chapter-panel">
+                <div class="container">
+                    <div class="chapter-card reveal">
+                        <span class="chapter-step"><span class="n">05</span><span class="l">Launch</span></span>
+                        <h2>We deliver — on an agreed day</h2>
+                        <p>Review, deployment, handover. Launch day is agreed in the scope, not hoped for. A souvenir photo app for a client in Germany went from idea to shipped in two weeks.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 6 — We stay -->
+        <section class="chapter right" id="ch-care" data-formation="6">
+            <div class="chapter-panel">
+                <div class="container">
+                    <div class="chapter-card reveal">
+                        <span class="chapter-step"><span class="n">06</span><span class="l">We stay</span></span>
+                        <h2>We stay long after launch</h2>
+                        <p>Automated reports land in your inbox. Personalised offers bring your customers back. And when a tech problem shows up, it&rsquo;s ours to solve — that&rsquo;s part of the deal, not an extra.</p>
+                        <p class="proof">For a restaurant in Germany — a website with direct reservations, QR opt-ins and personalised offers — guests now come back more often.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Outro / CTA -->
+        <section class="section" data-formation="7">
             <div class="container">
                 <div class="cta-band reveal">
-                    <h2>Ready to automate your business?</h2>
-                    <p>Tell us about your business, what you would like to build and the tools you already use — and we'll come back with a focused scope.</p>
+                    <span class="eyebrow">The next chapter</span>
+                    <h2>Your business could be the next story</h2>
+                    <p>Tell us about your business, what you would like to build and the tools you already use — and we&rsquo;ll come back with one specific idea.</p>
                     <div class="btn-row">
                         <a href="contact.html" class="btn" onclick="gtag('event', 'cta_click', {'button_label': 'Home CTA'})"><span>Start the conversation</span><span class="arrow">&rarr;</span></a>
+                        <a href="services.html" class="btn btn-ghost"><span>See all services</span></a>
+                    </div>
+                    <div class="stat-row">
+                        <span>10+ websites</span>
+                        <span>5+ apps</span>
+                        <span>3+ products</span>
+                        <span>Serving clients worldwide</span>
                     </div>
                 </div>
             </div>
@@ -237,11 +247,11 @@
     <div id="site-footer"></div>
 
     <!-- components -->
-    <script src="js/components.js?v=20261106-redesign"></script>
+    <script src="js/components.js?v=20261106-story"></script>
     <!-- site behaviour -->
-    <script src="js/site.js?v=20261106-redesign"></script>
-    <!-- three.js hero scene -->
-    <script type="module" src="js/hero-scene.js?v=20261106-redesign"></script>
+    <script src="js/site.js?v=20261106-story"></script>
+    <!-- scroll story scene -->
+    <script type="module" src="js/story.js?v=20261106-story"></script>
 
 </body>
 
