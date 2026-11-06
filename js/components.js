@@ -16,6 +16,7 @@
     var NAV_LINKS = [
         { href: 'index.html',    label: 'Home',     key: 'home' },
         { href: 'services.html', label: 'Services', key: 'services' },
+        { href: 'work.html',     label: 'Work',     key: 'work' },
         { href: 'about.html',    label: 'About',    key: 'about' },
         { href: 'contact.html',  label: 'Contact',  key: 'contact' }
     ];
@@ -33,6 +34,7 @@
         if (file === '' || file === 'index.html') return 'home';
         if (file === 'about.html') return 'about';
         if (file === 'services.html' || file === 'service.html') return 'services';
+        if (file === 'work.html') return 'work';
         if (file === 'contact.html') return 'contact';
         return '';
     }

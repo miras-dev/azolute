@@ -113,6 +113,22 @@
         })();
     }
 
+    /* ---------- Portfolio filter ---------- */
+    var filterButtons = document.querySelectorAll('.filter-row [data-filter]');
+    if (filterButtons.length) {
+        var workCards = document.querySelectorAll('.work-card[data-cat]');
+        filterButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                filterButtons.forEach(function (b) { b.classList.toggle('active', b === btn); });
+                var f = btn.getAttribute('data-filter');
+                workCards.forEach(function (card) {
+                    var show = f === 'all' || card.getAttribute('data-cat').split(' ').indexOf(f) !== -1;
+                    card.classList.toggle('hidden', !show);
+                });
+            });
+        });
+    }
+
     /* ---------- Scroll reveal ---------- */
     var items = document.querySelectorAll('.reveal');
 
