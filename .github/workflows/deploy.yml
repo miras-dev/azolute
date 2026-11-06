@@ -37,9 +37,13 @@ jobs:
           aws s3 sync . s3://${{ secrets.S3_BUCKET }} \
             --exclude ".git/*" \
             --exclude ".github/*" \
+            --exclude ".claude/*" \
+            --exclude "scripts/*" \
+            --exclude "img/landing/raw/*" \
             --exclude "stash/*" \
             --exclude "*.html" \
             --exclude "*.log" \
+            --exclude ".env*" \
             --cache-control "public, max-age=31536000, immutable"
 
       - name: Invalidate CloudFront cache
