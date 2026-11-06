@@ -1,74 +1,32 @@
-<!-- footer -->
-<footer class="mil-dark-bg">
-    <div class="mi-invert-fix">
-        <div class="container mil-p-120-60">
-            <div class="row justify-content-between">
-                <div class="col-md-4 col-lg-4 mil-mb-60">
-
-                    <!-- =============================================
-                         FOOTER BRAND + NEWSLETTER
-                         Edit tagline and email input here.
-                    ============================================== -->
-                    <div class="mil-logo mil-up mil-mb-30">
-                        <img src="img/logo-light.png" alt="Azolute" class="mil-logo-footer">
-                    </div>
-
-                    <p class="mil-light-soft mil-up mil-mb-30">Have a project in mind?</p><a href="mailto:miras@azolute.one" class="mil-link mil-muted"><span>Email Miras</span></a>
-
-                </div>
-                <div class="col-md-7 col-lg-6">
-                    <div class="row justify-content-end">
-                        <div class="col-md-6 col-lg-7">
-
-                            <!-- =============================================
-                                 FOOTER NAVIGATION
-                                 Edit links here to update all pages at once.
-                                 The active state is set automatically by JS.
-                            ============================================== -->
-                            <nav class="mil-footer-menu mil-mb-60">
-                                {{FOOTER_NAV}}
-                            </nav>
-
-                        </div>
-                        <div class="col-md-6 col-lg-5"></div>
-                    </div>
-                </div>
+<!-- =============================================
+     SITE FOOTER
+     Injected on every page by js/components.js.
+     Edit nav links in js/components.js (NAV_LINKS).
+============================================== -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <a href="index.html" class="brand">Azolute<span class="dot">.</span></a>
+                <p class="footer-tagline">Websites and custom software built around the way your business works.</p>
             </div>
-
-            <div class="row justify-content-between flex-sm-row-reverse">
-                <div class="col-md-7 col-lg-6">
-                    <div class="row justify-content-between">
-                        <div class="col-md-6 col-lg-5 mil-mb-60">
-
-                            <!-- =============================================
-                                 FOOTER CONTACT
-                                 Edit email/availability here.
-                            ============================================== -->
-                            <h6 class="mil-muted mil-up mil-mb-30">Contact Us</h6>
-
-                            <p class="mil-light-soft mil-up">miras@azolute.one <span class="mil-no-wrap">Available Worldwide</span></p>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-lg-6 mil-mb-60">
-
-                    <div class="mil-vert-between">
-                        <div class="mil-mb-30">
-
-                            <!-- =============================================
-                                 SOCIAL ICONS
-                                 Replace href="#." with real social URLs.
-                            ============================================== -->
-                            <!-- Social links will be added when verified profiles are available. -->
-
-                        </div>
-                        <p class="mil-light-soft mil-up">&copy; Copyright 2025 - Azolute AI Technologies. All Rights Reserved.</p>
-                    </div>
-
+            <div class="footer-col">
+                <h4>Navigate</h4>
+                <nav aria-label="Footer navigation">
+                    {{FOOTER_NAV}}
+                </nav>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <div class="footer-contact">
+                    <a href="mailto:miras@azolute.one">miras@azolute.one</a>
+                    <p>Remote — available worldwide</p>
                 </div>
             </div>
         </div>
+        <div class="footer-bottom">
+            <span>&copy; 2025 Azolute AI Technologies. All rights reserved.</span>
+            <span>Designed &amp; built by Azolute.</span>
+        </div>
     </div>
 </footer>
-<!-- footer end -->

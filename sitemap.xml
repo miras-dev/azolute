@@ -4,7 +4,7 @@
     <!-- Homepage -->
     <url>
         <loc>https://azolute.one/</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-11-06</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
@@ -12,7 +12,7 @@
     <!-- About -->
     <url>
         <loc>https://azolute.one/about.html</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-11-06</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -20,23 +20,15 @@
     <!-- Services -->
     <url>
         <loc>https://azolute.one/services.html</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-11-06</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
-    </url>
-
-    <!-- Service — Web Development -->
-    <url>
-        <loc>https://azolute.one/service.html</loc>
-        <lastmod>2026-04-15</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
     </url>
 
     <!-- Contact -->
     <url>
         <loc>https://azolute.one/contact.html</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-11-06</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.7</priority>
     </url>

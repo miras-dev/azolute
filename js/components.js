@@ -1,140 +1,59 @@
 /**
  * Azolute AI Technologies — Component Loader
  *
- * Loads components/header.html and components/footer.html and injects
- * them into every page. Edit those HTML files to update all pages at once.
- *
- * Active nav state is detected automatically from the current URL.
+ * Injects components/header.html and components/footer.html into every
+ * page (placeholders: #site-header and #site-footer). Edit those files,
+ * or NAV_LINKS below, to update all pages at once.
  */
 
 (function () {
+    'use strict';
 
     /* ------------------------------------------------------------------
-       SYNCHRONOUS HTML FILE LOADER
-       Runs before main.js so all DOM elements exist when GSAP/Swup init.
+       MAIN NAVIGATION
+       Edit links here to update header + footer nav on all pages.
     ------------------------------------------------------------------ */
+    var NAV_LINKS = [
+        { href: 'index.html',    label: 'Home',     key: 'home' },
+        { href: 'services.html', label: 'Services', key: 'services' },
+        { href: 'about.html',    label: 'About',    key: 'about' },
+        { href: 'contact.html',  label: 'Contact',  key: 'contact' }
+    ];
+
+    /* Synchronous loader so the header exists before first paint settles. */
     function loadHTML(url) {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, false); // false = synchronous
+        xhr.open('GET', url, false);
         xhr.send(null);
         return xhr.status === 200 ? xhr.responseText : '';
     }
 
-    /* ------------------------------------------------------------------
-       ACTIVE PAGE DETECTION
-    ------------------------------------------------------------------ */
     function getActivePage() {
         var file = window.location.pathname.split('/').pop() || 'index.html';
-        if (!file || file === 'index.html') return 'home';
-        if (file === 'about.html')                               return 'about';
+        if (file === '' || file === 'index.html') return 'home';
+        if (file === 'about.html') return 'about';
         if (file === 'services.html' || file === 'service.html') return 'services';
-        // Match case-studies index and all individual case study slugs
-        var caseStudySlugs = [
-            'case-studies.html',
-            'ai-chatbot-retail.html',
-            'workflow-automation-real-estate.html',
-            'website-chatbot-healthcare.html',
-            'crm-automation-ecommerce.html',
-            'lead-capture-bot-consulting.html',
-            'ai-support-agent-saas.html'
-        ];
-        if (caseStudySlugs.indexOf(file) !== -1) return 'case-studies';
-        if (file === 'blog.html' || file === 'blog-inner.html') return 'blog';
-        if (file === 'contact.html')                             return 'contact';
-        if (file === 'publication.html')                         return 'publication';
+        if (file === 'contact.html') return 'contact';
         return '';
     }
 
-    /* ------------------------------------------------------------------
-       MAIN NAVIGATION BUILDER
-       Edit the links here to update the nav across all pages.
-    ------------------------------------------------------------------ */
-    function buildMainNav(activePage) {
-        function li(page, label, href, extra) {
-            var cls = (extra ? [extra] : []);
-            if (activePage === page) cls.push('mil-active');
-            var attr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
-            return '<li' + attr + '><a href="' + href + '">' + label + '</a>';
-        }
-        return (
-            '<ul>' +
-            li('home',         'Home',         'index.html')    + '</li>' +
-            li('about',        'About',        'about.html')    + '</li>' +
-            li('services',     'Services',     '#.',            'mil-has-children') +
-                '<ul>' +
-                '<li><a href="services.html">All Services</a></li>' +
-                '<li><a href="service.html">Web Development</a></li>' +
-                '</ul></li>' +
-            li('contact',      'Contact',      'contact.html')  + '</li>' +
-            '</ul>'
-        );
+    function buildNav(active) {
+        return NAV_LINKS.map(function (l) {
+            var cls = l.key === active ? ' class="active" aria-current="page"' : '';
+            return '<a href="' + l.href + '"' + cls + '>' + l.label + '</a>';
+        }).join('\n');
     }
 
-    /* ------------------------------------------------------------------
-       FOOTER NAVIGATION BUILDER
-    ------------------------------------------------------------------ */
-    function buildFooterNav(activePage) {
-        function li(page, label, href) {
-            var cls = 'mil-up' + (activePage === page ? ' mil-active' : '');
-            return '<li class="' + cls + '"><a href="' + href + '">' + label + '</a></li>';
-        }
-        return (
-            '<ul>' +
-            li('home',         'Home',         'index.html')       +
-            li('about',        'About',        'about.html')       +
-            li('services',     'Services',     'services.html')    +
-            li('contact',      'Contact',      'contact.html')     +
-            '</ul>'
-        );
+    var active = getActivePage();
+    var nav = buildNav(active);
+
+    var headerHost = document.getElementById('site-header');
+    if (headerHost) {
+        headerHost.outerHTML = loadHTML('components/header.html').replace('{{NAV}}', nav);
     }
 
-    /* ------------------------------------------------------------------
-       INJECT HEADER
-    ------------------------------------------------------------------ */
-    function injectHeader() {
-        var el = document.getElementById('site-header');
-        if (!el) return;
-        var html = loadHTML('components/header.html');
-        html = html.replace('{{NAV}}', buildMainNav(getActivePage()));
-        el.outerHTML = html;
+    var footerHost = document.getElementById('site-footer');
+    if (footerHost) {
+        footerHost.outerHTML = loadHTML('components/footer.html').replace('{{FOOTER_NAV}}', nav);
     }
-
-    /* ------------------------------------------------------------------
-       INJECT FOOTER
-    ------------------------------------------------------------------ */
-    function injectFooter() {
-        var el = document.getElementById('site-footer');
-        if (!el) return;
-        var html = loadHTML('components/footer.html');
-        html = html.replace('{{FOOTER_NAV}}', buildFooterNav(getActivePage()));
-        el.outerHTML = html;
-    }
-
-    /* ------------------------------------------------------------------
-       UPDATE NAV ACTIVE STATE (used after Swup page transitions)
-    ------------------------------------------------------------------ */
-    function updateNavActive() {
-        var nav = document.getElementById('swupMenu');
-        if (nav) nav.innerHTML = buildMainNav(getActivePage());
-    }
-
-    /* ------------------------------------------------------------------
-       INITIAL INJECTION
-       Runs synchronously — header and footer are in the DOM before
-       main.js starts so GSAP and Swup find all their elements.
-    ------------------------------------------------------------------ */
-    injectHeader();
-    injectFooter();
-
-    /* ------------------------------------------------------------------
-       SWUP RE-INJECTION
-       After Swup replaces #swupMain, the footer placeholder from the
-       new page's raw HTML is restored — re-inject the footer and
-       refresh the nav active state.
-    ------------------------------------------------------------------ */
-    document.addEventListener('swup:contentReplaced', function () {
-        injectFooter();
-        updateNavActive();
-    });
-
-}());
+})();
