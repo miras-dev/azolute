@@ -104,10 +104,13 @@
             <div class="hero-bg" aria-hidden="true">
                 <div class="orb orb-1"></div>
                 <div class="orb orb-2"></div>
+                <canvas class="scene-canvas" data-scene="full"></canvas>
             </div>
             <div class="container">
                 <span class="eyebrow">Websites · Software · AI Automation</span>
-                <h1>Automate your business. <span class="grad-text">Grow intelligently.</span></h1>
+                <h1>Automate your business.<br>
+                    <span class="word-rotate" data-words='["Grow intelligently.","Automate the busywork.","Scale with systems."]'><span class="word grad-text">Grow intelligently.</span></span>
+                </h1>
                 <p class="lead">Azolute AI builds websites and custom software around the way your business works — so your team spends less time on manual work and more time on customers.</p>
                 <div class="btn-row">
                     <a href="services.html" class="btn" onclick="gtag('event', 'cta_click', {'button_label': 'Our Services'})"><span>Explore our services</span><span class="arrow">&rarr;</span></a>
@@ -237,6 +240,8 @@
     <script src="js/components.js?v=20261106-redesign"></script>
     <!-- site behaviour -->
     <script src="js/site.js?v=20261106-redesign"></script>
+    <!-- three.js hero scene -->
+    <script type="module" src="js/hero-scene.js?v=20261106-redesign"></script>
 
 </body>
 

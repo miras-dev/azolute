@@ -334,6 +334,53 @@ p { margin: 0 0 1.2em; }
     mask-image: radial-gradient(ellipse 90% 70% at 50% 10%, #000 30%, transparent 75%);
 }
 
+/* Three.js scene canvas (sits inside .hero-bg, behind content) */
+.scene-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+}
+
+.scene-canvas.scene-ready { opacity: 1; }
+
+/* Rotating headline word */
+.word-rotate .word {
+    display: inline-block;
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.word-rotate .word.out {
+    opacity: 0;
+    transform: translateY(0.45em);
+}
+
+/* Cursor glow */
+.cursor-glow {
+    position: fixed;
+    top: -260px;
+    left: -260px;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(128, 80, 240, 0.09), transparent 65%);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    will-change: transform;
+}
+
+.cursor-glow.on { opacity: 1; }
+
+/* Tilt targets */
+.card, .step, .founder-mark { will-change: transform; }
+.step { transition: transform 0.3s var(--ease); }
+
 .orb {
     position: absolute;
     border-radius: 50%;
