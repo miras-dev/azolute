@@ -65,8 +65,14 @@
 
     /* ---------- 3D tilt on cards ---------- */
     if (finePointer && !reducedMotion) {
-        document.querySelectorAll('.card, .step, .founder-mark').forEach(function (el) {
+        document.querySelectorAll('.card, .step, .founder-mark, .chapter-card').forEach(function (el) {
             var lift = el.classList.contains('card') ? ' translateY(-5px)' : '';
+
+            // track 1:1 during the gesture (apple-design §2): the class's
+            // 300ms transition would lag the pointer, so suspend it on enter
+            el.addEventListener('pointerenter', function () {
+                el.style.transition = 'transform 60ms ease-out';
+            });
 
             el.addEventListener('pointermove', function (e) {
                 var r = el.getBoundingClientRect();
@@ -76,7 +82,9 @@
                     'deg) rotateY(' + (px * 8).toFixed(2) + 'deg)' + lift;
             });
 
+            // settle from the current (presentation) value with the slower ease
             el.addEventListener('pointerleave', function () {
+                el.style.transition = '';
                 el.style.transform = '';
             });
         });

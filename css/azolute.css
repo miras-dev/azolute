@@ -68,8 +68,9 @@ h1, h2, h3, h4, h5, h6 {
     text-wrap: balance;
 }
 
-h1 { font-size: clamp(2.6rem, 6.4vw, 4.6rem); }
-h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); }
+/* tracking is size-specific: tighter as type grows (apple-design §15) */
+h1 { font-size: clamp(2.6rem, 6.4vw, 4.6rem); line-height: 1.06; letter-spacing: -0.028em; }
+h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); letter-spacing: -0.022em; }
 h3 { font-size: clamp(1.35rem, 2.4vw, 1.7rem); }
 h4 { font-size: 1.2rem; }
 
@@ -153,6 +154,12 @@ p { margin: 0 0 1.2em; }
 .btn .arrow { transition: transform 0.25s var(--ease); }
 .btn:hover .arrow { transform: translateX(3px); }
 
+/* instant press feedback on pointer-down (apple-design §1) */
+.btn:active {
+    transform: scale(0.97);
+    transition: transform 100ms ease-out;
+}
+
 .btn-ghost {
     background: transparent;
     border-color: var(--line-strong);
@@ -187,8 +194,24 @@ p { margin: 0 0 1.2em; }
     background: rgba(7, 7, 13, 0.82);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    border-bottom-color: var(--line);
+    border-bottom-color: rgba(255, 255, 255, 0.05);
 }
+
+/* scroll edge effect instead of a hard divider (apple-design §12) */
+.site-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 18px;
+    background: linear-gradient(rgba(7, 7, 13, 0.55), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.site-header.scrolled::after { opacity: 1; }
 
 .header-inner {
     display: flex;
@@ -378,8 +401,8 @@ p { margin: 0 0 1.2em; }
 .cursor-glow.on { opacity: 1; }
 
 /* Tilt targets */
-.card, .step, .founder-mark { will-change: transform; }
-.step { transition: transform 0.3s var(--ease); }
+.card, .step, .founder-mark, .chapter-card { will-change: transform; }
+.step, .founder-mark, .chapter-card { transition: transform 0.3s var(--ease); }
 
 .orb {
     position: absolute;
@@ -946,6 +969,8 @@ a.card:focus-visible {
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid var(--line);
+    /* bright top edge = light catching the material (apple-design §12) */
+    border-top-color: rgba(255, 255, 255, 0.16);
     border-radius: var(--radius);
     padding: clamp(1.8rem, 3vw, 2.6rem);
 }
@@ -1089,6 +1114,29 @@ a.card:focus-visible {
 .js .reveal[data-delay="1"] { transition-delay: 0.08s; }
 .js .reveal[data-delay="2"] { transition-delay: 0.16s; }
 .js .reveal[data-delay="3"] { transition-delay: 0.24s; }
+
+/* translucency and contrast preferences (apple-design §14) */
+@media (prefers-reduced-transparency: reduce) {
+    .site-header.scrolled,
+    .site-nav,
+    .chapter-card,
+    .story-rail a span {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: #0b0b13;
+    }
+
+    .cursor-glow { display: none; }
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --line: rgba(255, 255, 255, 0.25);
+        --line-strong: rgba(255, 255, 255, 0.4);
+        --text-soft: #c9c9d8;
+        --text-faint: #9d9db2;
+    }
+}
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
