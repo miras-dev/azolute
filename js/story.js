@@ -1,22 +1,22 @@
 /**
- * Azolute AI Technologies — homepage scroll story
+ * Azolute AI Technologies, homepage scroll story
  *
  * A fixed fullscreen Three.js canvas sits behind the page. As the visitor
  * scrolls through the story chapters, ~1600 particles morph between
  * formations, one per chapter:
  *
- *   0 hero    — galaxy (ambient field)
- *   1 discover— radar sphere with equator scan ring (we study your business)
- *   2 idea    — comet spiral converging on one glowing point (one specific idea)
- *   3 scope   — ordered 3D lattice (mapping your tools, agreeing the scope)
- *   4 build   — particles assemble into a website wireframe (we build)
- *   5 launch  — expanding burst (delivery day)
- *   6 care    — orbit rings around a core (we stay with you)
- *   7 outro   — calm galaxy (CTA)
+ *   0 hero   , galaxy (ambient field)
+ *   1 discover- radar sphere with equator scan ring (we study your business)
+ *   2 idea   , comet spiral converging on one glowing point (one specific idea)
+ *   3 scope  , ordered 3D lattice (mapping your tools, agreeing the scope)
+ *   4 build  , particles assemble into a website wireframe (we build)
+ *   5 launch , expanding burst (delivery day)
+ *   6 care   , orbit rings around a core (we stay with you)
+ *   7 outro  , calm galaxy (CTA)
  *
  * Also drives the chapter progress rail. Respects prefers-reduced-motion
  * (single static frame, no morphing), pauses when the tab is hidden, and
- * fails silently without WebGL — the story text is plain HTML either way.
+ * fails silently without WebGL, the story text is plain HTML either way.
  */
 
 import * as THREE from './vendor/three.module.min.js';
@@ -124,7 +124,7 @@ function initStory(canvas) {
         const a = new Float32Array(n * 3);
         const W = 6.4, H = 4.0, z = 0;
         const segs = [
-            // [x1,y1,x2,y2,weight] — frame
+            // [x1,y1,x2,y2,weight], frame
             [-W / 2, H / 2, W / 2, H / 2, 2], [-W / 2, -H / 2, W / 2, -H / 2, 2],
             [-W / 2, -H / 2, -W / 2, H / 2, 1.4], [W / 2, -H / 2, W / 2, H / 2, 1.4],
             // header divider + nav dots

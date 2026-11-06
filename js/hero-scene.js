@@ -1,9 +1,9 @@
 /**
- * Azolute AI Technologies — Three.js hero scene
+ * Azolute AI Technologies, Three.js hero scene
  *
  * Mounts a WebGL scene on any <canvas data-scene> element:
- *   data-scene="full"      — wireframe geometry cluster + particle field (homepage)
- *   data-scene="particles" — lighter particle field only (inner pages)
+ *   data-scene="full"     , wireframe geometry cluster + particle field (homepage)
+ *   data-scene="particles", lighter particle field only (inner pages)
  *
  * Respects prefers-reduced-motion (renders a single static frame),
  * pauses when the tab is hidden or the canvas is scrolled out of view,

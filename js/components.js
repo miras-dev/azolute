@@ -1,5 +1,5 @@
 /**
- * Azolute AI Technologies — Component Loader
+ * Azolute AI Technologies, Component Loader
  *
  * Injects components/header.html and components/footer.html into every
  * page (placeholders: #site-header and #site-footer). Edit those files,

@@ -1,5 +1,5 @@
 /**
- * Azolute AI Technologies — site behaviour
+ * Azolute AI Technologies, site behaviour
  * Vanilla JS: header scroll state, mobile nav, scroll reveal.
  * Runs after js/components.js (header/footer already injected).
  */

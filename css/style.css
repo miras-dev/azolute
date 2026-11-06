@@ -51,12 +51,12 @@ Developer:	Azolute AI Technologies
 @import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css);
 
 /* -------------------------------------------
-   AZOLUTE AI TECHNOLOGIES — DESIGN TOKENS
+   AZOLUTE AI TECHNOLOGIES, DESIGN TOKENS
    To change the brand accent color globally,
    update --accent below. One place, done.
 ------------------------------------------- */
 :root {
-  /* Brand accent — primary action/highlight color */
+  /* Brand accent, primary action/highlight color */
   --accent: #5d00ff;
   --accent-glow: rgba(250, 168, 69, 0);
   /* transparent end for glow gradients */
@@ -4838,7 +4838,7 @@ html.is-animating .mil-menu-frame {
 }
 
 /* ============================================
-   LOGO — two versions, shown/hidden by context
+   LOGO, two versions, shown/hidden by context
    ============================================ */
 
 /* Sizing */
@@ -4885,7 +4885,7 @@ html.is-animating .mil-menu-frame {
   }
 }
 
-/* Homepage desktop — dark hero behind the fixed logo */
+/* Homepage desktop, dark hero behind the fixed logo */
 body.page-dark-hero .mil-frame .mil-frame-top .mil-logo-dark {
   display: none;
 }
