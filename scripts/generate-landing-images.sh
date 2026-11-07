@@ -42,7 +42,7 @@ mkdir -p "$OUT"
 MODEL="gemini-2.5-flash-image"
 URL="https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent"
 
-STYLE="Premium dark 3D render on a near-black deep charcoal background, glowing violet (#8050f0) and soft lavender accent lighting, glassy translucent surfaces, faint blueprint grid, cinematic rim light, volumetric glow, high detail, octane render style. Strictly no text, no words, no letters, no numbers, no logos, no watermarks."
+STYLE="Cinematic photograph, moody low-key lighting with deep near-black shadows so the image blends into a dark page, one warm practical light source plus a subtle violet (#8050f0) accent glow, shallow depth of field, film grain, high detail. People shown only from behind, over the shoulder, as hands or as soft silhouettes, never a clear face. Any screens or interfaces appear as soft out-of-focus glowing shapes. Strictly no readable text, no words, no letters, no numbers, no logos, no watermarks."
 
 generate() {
     name="$1"; ratio="$2"; prompt="$3"
@@ -104,19 +104,19 @@ PY
     fi
 }
 
-# ---------- the 12 images ----------
-generate card-01 "4:5" "A sleek floating glassy website browser window, abstract modern landing page layout with hero block, rounded content cards and a glowing violet call-to-action button, slight 3D perspective tilt"
-generate card-02 "4:5" "A floating glass chat interface panel with glowing rounded message bubbles and a small luminous AI orb assistant hovering beside it, slight 3D perspective tilt"
-generate card-03 "4:5" "An abstract automation workflow: glowing connected nodes joined by flowing light lines forming a clean pipeline, small gears and arrows made of light, slight 3D perspective tilt"
-generate card-04 "4:5" "A sleek floating calendar booking interface, one date slot glowing violet with a checkmark orb, subtle clock element, glassy 3D panel with perspective tilt"
-generate card-05 "4:5" "A floating analytics dashboard panel with glowing bar charts, a rising line graph and small stat tiles, glassy dark UI, slight 3D perspective tilt"
-generate card-06 "4:5" "A luminous core sphere orbited by three small glowing satellites on tilted rings, representing always-on support, glassy materials"
-generate abstract-01 "1:1" "Abstract composition of floating translucent glass shards catching violet rim light, deep dark background"
-generate abstract-02 "1:1" "A flowing ribbon of violet and blue light forming a smooth wave through darkness, long exposure feel"
-generate abstract-03 "1:1" "A glassy wireframe dodecahedron glowing from within, violet edge light, floating in darkness"
-generate abstract-04 "1:1" "A field of small luminous particles swirling into a gentle vortex, violet and lavender tones"
-generate backdrop-01 "16:9" "A vast dark nebula of violet and deep blue gradients with faint particles, cinematic wide atmospheric backdrop, very subtle"
-generate backdrop-02 "16:9" "A wide dark horizon of faint glowing circuit-like lines fading into atmospheric violet haze, cinematic, very subtle"
+# ---------- the 12 images: the client journey ----------
+generate card-01 "4:5" "Over-the-shoulder view of a cafe owner behind the counter of a cozy cafe at dusk, holding a tablet that glows softly with a blurred reservation interface, espresso machine and warm cafe lights blurred in the dark background, a new booking arriving"
+generate card-02 "4:5" "A customer's hands holding a phone in a dark room at night, the screen glowing with soft blurred chat bubbles of a website support conversation, one bubble pulsing violet as an AI assistant replies instantly"
+generate card-03 "4:5" "A small dark office desk seen from above at an angle: on one side a messy pile of paper notes and sticky notes fading into shadow, on the other a laptop whose screen casts a calm violet glow of an orderly flowing diagram, the chaos literally dissolving into light streaming toward the laptop"
+generate card-04 "4:5" "Over-the-shoulder view at a salon reception desk in the evening, a screen glowing with a soft blurred calendar filling up with appointment blocks, hair styling tools and warm mirror lights blurred in the dark background"
+generate card-05 "4:5" "Morning scene in near darkness: hands holding a warm cup of coffee next to a phone propped on a wooden table, the phone screen glowing softly with a blurred daily report of rising charts, first daylight barely breaking in the dark background"
+generate card-06 "4:5" "A restaurant table at night with a small table-tent card, a guest's hand holding a phone scanning it, the phone glowing with a soft violet offer notification, candlelight and dark restaurant ambience around, a returning regular customer"
+generate abstract-01 "1:1" "Close-up of two hands in a handshake across a desk in a dark room, lit by a single warm desk lamp and the violet glow of a laptop screen beside them, a deal agreed"
+generate abstract-02 "1:1" "Extreme close-up of a phone lying on a dark wooden table lighting up with one soft glowing notification orb, violet glow spilling onto the wood, everything else in darkness"
+generate abstract-03 "1:1" "A keychain-sized glowing violet orb levitating above an open palm in darkness, tiny points of light orbiting it, representing a system that runs itself"
+generate abstract-04 "1:1" "A small shop storefront at night seen from the dark street, windows glowing warm, one soft violet neon accent, silhouette of the owner inside turning the closed sign, inviting and alive"
+generate backdrop-01 "16:9" "Very dark wide interior of a cozy cafe at night, out of focus, only faint warm bokeh lights and a subtle violet glow from a laptop somewhere, almost black, atmospheric backdrop"
+generate backdrop-02 "16:9" "Very dark wide view of a small business street at night, out of focus warm shop windows and one violet neon reflection on wet pavement, almost black, atmospheric backdrop"
 
 rm -f "$OUT/.resp.json"
 echo
