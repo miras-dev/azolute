@@ -42,7 +42,7 @@ mkdir -p "$OUT"
 MODEL="gemini-2.5-flash-image"
 URL="https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent"
 
-STYLE="Cinematic photograph, moody low-key lighting with deep near-black shadows so the image blends into a dark page, one warm practical light source plus a subtle violet (#8050f0) accent glow, shallow depth of field, film grain, high detail. People shown only from behind, over the shoulder, as hands or as soft silhouettes, never a clear face. Any screens or interfaces appear as soft out-of-focus glowing shapes. Strictly no readable text, no words, no letters, no numbers, no logos, no watermarks."
+STYLE="Modern flat vector illustration with soft gradients and subtle grain texture, dark near-black background (#0b0b13) so the image blends into a dark page, violet (#8050f0) and lavender as the dominant palette with small warm amber light accents, clean geometric shapes, simple stylized faceless characters, gentle glow effects, cohesive editorial tech-illustration style like a premium SaaS brand. Any screens or interfaces are abstract shapes and bars only. Strictly no readable text, no words, no letters, no numbers, no logos, no watermarks."
 
 generate() {
     name="$1"; ratio="$2"; prompt="$3"
