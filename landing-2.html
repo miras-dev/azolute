@@ -43,186 +43,210 @@
 
     <div id="site-header"></div>
 
-    <div class="playhead" aria-hidden="true"><div class="fill" id="playheadFill"></div></div>
-
     <main id="main">
 
-        <!-- ACT 0: hook -->
-        <section class="hero landing-hero">
+        <!-- Hero: the promise, and the proof you can touch -->
+        <section class="page-hero">
             <div class="hero-bg" aria-hidden="true">
                 <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
             </div>
             <div class="container">
-                <span class="eyebrow">The Azolute AI Ecosystem</span>
-                <h1>This is a story we see <span class="grad-text">every week.</span></h1>
-                <p class="lead">A good business, losing customers it never knew it had. Scroll to watch what happens when the manual work disappears.</p>
-                <div class="scroll-cue">
-                    <span class="cue-arrow" aria-hidden="true">&darr;</span>
-                    <span>Scroll to press play</span>
+                <div class="transform-sect" style="padding-block: 0;">
+                    <div>
+                        <span class="eyebrow">The Azolute AI Ecosystem</span>
+                        <h1>Your business, <span class="grad-text">running itself</span></h1>
+                        <p class="lead">One subscription that answers your calls, replies on WhatsApp, fills your calendar and brings customers back. Wired by an engineer who stays.</p>
+                        <div class="btn-row" style="margin-top: 1.8rem;">
+                            <a href="contact.html" class="btn" onclick="gtag('event', 'cta_click', {'button_label': 'Landing2 Hero'})"><span>Start the conversation</span><span class="arrow">&rarr;</span></a>
+                            <a href="work.html" class="btn btn-ghost"><span>See our work</span></a>
+                        </div>
+                    </div>
+                    <div class="ba-wrap reveal">
+                        <div class="ba-card">
+                            <img class="ba-before" src="img/landing2/scene-0-before.webp" alt="A quiet cafe before Azolute">
+                            <img class="ba-after" src="img/landing2/scene-0-after.webp" alt="The same cafe, full of guests, after Azolute">
+                            <span class="ba-tag ba-tag-before">Before</span>
+                            <span class="ba-tag ba-tag-after">After</span>
+                            <div class="ba-handle" role="slider" tabindex="0" aria-label="Before and after comparison" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <p class="ba-hint">Drag the line. That&rsquo;s what we do.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ACT 1: before, three vignettes -->
-        <section class="film-act act-vignettes" data-fx="vignettes">
-            <div class="stage">
-                <figure class="vignette">
-                    <img class="scene-img" src="img/landing2/scene-1-before.webp" alt="" loading="lazy">
-                    <div class="shade"></div>
-                    <div class="film-caption"><div class="container"><div class="cap-card">
-                        <span class="cap-tag before">Before</span>
-                        <h3>The phone rings out</h3>
-                        <p>Bookings only by phone. Half the calls come when nobody can answer.</p>
-                    </div></div></div>
-                </figure>
-                <figure class="vignette">
-                    <img class="scene-img" src="img/landing2/scene-2-before.webp" alt="" loading="lazy">
-                    <div class="shade"></div>
-                    <div class="film-caption"><div class="container"><div class="cap-card">
-                        <span class="cap-tag before">Before</span>
-                        <h3>Enquiries go cold at night</h3>
-                        <p>Every unanswered message is a customer who went somewhere else.</p>
-                    </div></div></div>
-                </figure>
-                <figure class="vignette">
-                    <img class="scene-img" src="img/landing2/scene-3-before.webp" alt="" loading="lazy">
-                    <div class="shade"></div>
-                    <div class="film-caption"><div class="container"><div class="cap-card">
-                        <span class="cap-tag before">Before</span>
-                        <h3>Midnight admin</h3>
-                        <p>The owner does the books when everyone else sleeps.</p>
-                    </div></div></div>
-                </figure>
+        <!-- The problem -->
+        <section class="section section-soft">
+            <div class="container">
+                <div class="section-head reveal">
+                    <span class="eyebrow">The story we see every week</span>
+                    <h2>A good business, losing customers it never knew it had</h2>
+                </div>
+                <div class="problem-grid">
+                    <div class="problem-card reveal">
+                        <img src="img/landing2/scene-1-before.webp" alt="" loading="lazy">
+                        <div class="pc-body">
+                            <h3>The phone rings out</h3>
+                            <p>Bookings only by phone. Half the calls come when nobody can answer.</p>
+                        </div>
+                    </div>
+                    <div class="problem-card reveal" data-delay="1">
+                        <img src="img/landing2/scene-2-before.webp" alt="" loading="lazy">
+                        <div class="pc-body">
+                            <h3>Enquiries go cold at night</h3>
+                            <p>Every unanswered message is a customer who went somewhere else.</p>
+                        </div>
+                    </div>
+                    <div class="problem-card reveal" data-delay="2">
+                        <img src="img/landing2/scene-3-before.webp" alt="" loading="lazy">
+                        <div class="pc-body">
+                            <h3>Midnight admin</h3>
+                            <p>The owner does the books when everyone else sleeps.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- ACT 2: the turn -->
-        <section class="film-act act-turn" data-fx="turn">
-            <div class="stage">
-                <img class="scene-img img-before" src="img/landing2/scene-0-before.webp" alt="" loading="lazy">
-                <img class="scene-img img-after" src="img/landing2/scene-0-after.webp" alt="" loading="lazy" style="clip-path: none; opacity: 0;">
-                <div class="shade"></div>
-                <div class="turn-line" aria-hidden="true"></div>
-                <div class="turn-copy turn-copy-1"><h2>Then we sat down together.<br>For fifteen minutes.</h2></div>
-                <div class="turn-copy turn-copy-2"><h2>One specific idea.<br>An agreed scope.<br>Then we built.</h2></div>
+        <!-- The turn -->
+        <section class="turn-band">
+            <div class="container">
+                <div class="inner reveal">
+                    <span class="eyebrow">Then everything changes</span>
+                    <h2>Fifteen minutes. One specific idea. An agreed scope.</h2>
+                    <p>We learn how your business runs, agree exactly what will be built and what it costs, and then we build. Drag through what changes.</p>
+                </div>
             </div>
         </section>
 
-        <!-- ACT 3.1: bookings wipe -->
-        <section class="film-act act-wipe" data-fx="wipe">
-            <div class="stage">
-                <img class="scene-img img-before" src="img/landing2/scene-1-before.webp" alt="" loading="lazy">
-                <img class="scene-img img-after" src="img/landing2/scene-1-after.webp" alt="" loading="lazy">
-                <div class="shade"></div>
-                <div class="wipe-divider" aria-hidden="true"></div>
-                <div class="film-caption"><div class="container"><div class="cap-stack">
-                    <div class="cap-card cap-before">
-                        <span class="cap-tag before">Before</span>
-                        <h3>Phone-only bookings</h3>
-                        <p>The reservation book sits empty while the phone rings out.</p>
+        <!-- Transformation 1: bookings -->
+        <section class="section">
+            <div class="container">
+                <div class="transform-sect">
+                    <div class="ba-wrap reveal">
+                        <div class="ba-card">
+                            <img class="ba-before" src="img/landing2/scene-1-before.webp" alt="Empty paper reservation book">
+                            <img class="ba-after" src="img/landing2/scene-1-after.webp" alt="Glowing tablet calendar filling with bookings">
+                            <span class="ba-tag ba-tag-before">Before</span>
+                            <span class="ba-tag ba-tag-after">After</span>
+                            <div class="ba-handle" role="slider" tabindex="0" aria-label="Bookings before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
                     </div>
-                    <div class="cap-card cap-after">
-                        <span class="cap-tag after">After</span>
-                        <h3>Direct bookings, day and night</h3>
-                        <p>The AI receptionist answers every call and the calendar fills itself.</p>
+                    <div class="reveal" data-delay="1">
+                        <span class="chapter-step"><span class="n">01</span><span class="l">Bookings</span></span>
+                        <h2>The calendar fills itself</h2>
+                        <p class="muted">The AI receptionist answers every call, day and night, takes the booking and sends the confirmation. Phone-only becomes booked-out.</p>
+                        <ul class="tag-list" style="margin-top: 1.2rem;">
+                            <li>AI phone receptionist</li>
+                            <li>Online booking</li>
+                            <li>Automated reminders</li>
+                        </ul>
                     </div>
-                </div></div></div>
+                </div>
+
+                <!-- Transformation 2: messages -->
+                <div class="transform-sect flip">
+                    <div class="ba-wrap reveal">
+                        <div class="ba-card">
+                            <img class="ba-before" src="img/landing2/scene-2-before.webp" alt="Unread messages piling up at night">
+                            <img class="ba-after" src="img/landing2/scene-2-after.webp" alt="Messages answered by the AI agent">
+                            <span class="ba-tag ba-tag-before">Before</span>
+                            <span class="ba-tag ba-tag-after">After</span>
+                            <div class="ba-handle" role="slider" tabindex="0" aria-label="Messages before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                    </div>
+                    <div class="reveal" data-delay="1">
+                        <span class="chapter-step"><span class="n">02</span><span class="l">Messages</span></span>
+                        <h2>Answered in seconds, around the clock</h2>
+                        <p class="muted">The WhatsApp agent replies instantly from your approved information, captures the lead, and hands the good ones to you. A missed call gets a text back before the customer finds your competitor.</p>
+                        <ul class="tag-list" style="margin-top: 1.2rem;">
+                            <li>WhatsApp AI agent</li>
+                            <li>Missed-call text-back</li>
+                            <li>Human handover</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Transformation 3: busywork -->
+                <div class="transform-sect">
+                    <div class="ba-wrap reveal">
+                        <div class="ba-card">
+                            <img class="ba-before" src="img/landing2/scene-3-before.webp" alt="A desk buried in paperwork at night">
+                            <img class="ba-after" src="img/landing2/scene-3-after.webp" alt="A clean desk with one morning report">
+                            <span class="ba-tag ba-tag-before">Before</span>
+                            <span class="ba-tag ba-tag-after">After</span>
+                            <div class="ba-handle" role="slider" tabindex="0" aria-label="Busywork before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                    </div>
+                    <div class="reveal" data-delay="1">
+                        <span class="chapter-step"><span class="n">03</span><span class="l">Busywork</span></span>
+                        <h2>One report with your coffee</h2>
+                        <p class="muted">The busywork runs itself overnight. Every morning you read one summary: enquiries answered, bookings made, leads captured. That&rsquo;s the whole admin.</p>
+                        <ul class="tag-list" style="margin-top: 1.2rem;">
+                            <li>Workflow automation</li>
+                            <li>Owner&rsquo;s daily report</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Transformation 4: regulars -->
+                <div class="transform-sect flip">
+                    <div class="ba-wrap reveal">
+                        <div class="ba-card">
+                            <img class="ba-before" src="img/landing2/scene-4-before.webp" alt="A customer walking away from a dark shop">
+                            <img class="ba-after" src="img/landing2/scene-4-after.webp" alt="The same shop warm and busy with returning customers">
+                            <span class="ba-tag ba-tag-before">Before</span>
+                            <span class="ba-tag ba-tag-after">After</span>
+                            <div class="ba-handle" role="slider" tabindex="0" aria-label="Customer retention before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                    </div>
+                    <div class="reveal" data-delay="1">
+                        <span class="chapter-step"><span class="n">04</span><span class="l">Regulars</span></span>
+                        <h2>One-time visitors come back</h2>
+                        <p class="muted">QR opt-ins at the table, personalised offers by what each customer loved last time, win-backs for the ones who drifted. For a restaurant in Germany, guests now come back more often.</p>
+                        <ul class="tag-list" style="margin-top: 1.2rem;">
+                            <li>QR opt-ins</li>
+                            <li>Personalised offers</li>
+                            <li>Win-back campaigns</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- ACT 3.2: messages wipe -->
-        <section class="film-act act-wipe" data-fx="wipe">
-            <div class="stage">
-                <img class="scene-img img-before" src="img/landing2/scene-2-before.webp" alt="" loading="lazy">
-                <img class="scene-img img-after" src="img/landing2/scene-2-after.webp" alt="" loading="lazy">
-                <div class="shade"></div>
-                <div class="wipe-divider" aria-hidden="true"></div>
-                <div class="film-caption"><div class="container"><div class="cap-stack">
-                    <div class="cap-card cap-before">
-                        <span class="cap-tag before">Before</span>
-                        <h3>Messages pile up unread</h3>
-                        <p>WhatsApp enquiries stack up in the dark, going cold one by one.</p>
-                    </div>
-                    <div class="cap-card cap-after">
-                        <span class="cap-tag after">After</span>
-                        <h3>Answered in seconds</h3>
-                        <p>The WhatsApp agent replies instantly, captures the lead, and hands the good ones to you.</p>
-                    </div>
-                </div></div></div>
-            </div>
-        </section>
-
-        <!-- ACT 3.3: busywork wipe -->
-        <section class="film-act act-wipe" data-fx="wipe">
-            <div class="stage">
-                <img class="scene-img img-before" src="img/landing2/scene-3-before.webp" alt="" loading="lazy">
-                <img class="scene-img img-after" src="img/landing2/scene-3-after.webp" alt="" loading="lazy">
-                <div class="shade"></div>
-                <div class="wipe-divider" aria-hidden="true"></div>
-                <div class="film-caption"><div class="container"><div class="cap-stack">
-                    <div class="cap-card cap-before">
-                        <span class="cap-tag before">Before</span>
-                        <h3>The busywork never ends</h3>
-                        <p>Sticky notes, spreadsheets, copy-paste between five apps.</p>
-                    </div>
-                    <div class="cap-card cap-after">
-                        <span class="cap-tag after">After</span>
-                        <h3>One report with your coffee</h3>
-                        <p>The busywork runs itself overnight. You read one morning summary.</p>
-                    </div>
-                </div></div></div>
-            </div>
-        </section>
-
-        <!-- ACT 3.4: regulars wipe -->
-        <section class="film-act act-wipe" data-fx="wipe">
-            <div class="stage">
-                <img class="scene-img img-before" src="img/landing2/scene-4-before.webp" alt="" loading="lazy">
-                <img class="scene-img img-after" src="img/landing2/scene-4-after.webp" alt="" loading="lazy">
-                <div class="shade"></div>
-                <div class="wipe-divider" aria-hidden="true"></div>
-                <div class="film-caption"><div class="container"><div class="cap-stack">
-                    <div class="cap-card cap-before">
-                        <span class="cap-tag before">Before</span>
-                        <h3>Visitors leave and never return</h3>
-                        <p>No way to reach the customer who loved it here last month.</p>
-                    </div>
-                    <div class="cap-card cap-after">
-                        <span class="cap-tag after">After</span>
-                        <h3>One-time visitors become regulars</h3>
-                        <p>QR opt-ins and personalised offers bring them back, again and again.</p>
-                    </div>
-                </div></div></div>
-            </div>
-        </section>
-
-        <!-- ACT 4: proof -->
+        <!-- Proof -->
         <section class="section section-soft">
             <div class="container">
                 <div class="section-head reveal">
                     <span class="eyebrow">Proof, not promises</span>
                     <h2>Numbers from production, <span class="grad-text">not a pitch deck</span></h2>
-                    <p class="lead">We show the mechanism and let the results speak. These are real.</p>
                 </div>
                 <div class="card-grid">
                     <div class="card reveal"><h3>10+ / 5+ / 3+</h3><p>Websites, apps and products delivered end to end.</p></div>
                     <div class="card reveal" data-delay="1"><h3>Two weeks</h3><p>From idea to shipped, for a client app in Germany.</p></div>
                     <div class="card reveal" data-delay="2"><h3>10&ndash;15 hours a week</h3><p>Saved by one automation, every week, for its users.</p></div>
-                    <div class="card reveal" data-delay="3"><h3>Guests come back</h3><p>A restaurant's regulars return more often on personalised offers.</p></div>
+                    <div class="card reveal" data-delay="3"><h3>Guests come back</h3><p>A restaurant&rsquo;s regulars return more often on personalised offers.</p></div>
                 </div>
             </div>
         </section>
 
-        <!-- ACT 5: your turn -->
+        <!-- CTA -->
         <section class="section">
             <div class="container">
                 <div class="cta-band reveal">
                     <span class="eyebrow">The Azolute AI Ecosystem</span>
                     <h2>Your business, after</h2>
-                    <p>Calls answered. WhatsApp handled. Bookings filled. Customers returning. One subscription, wired by an engineer who stays.</p>
+                    <p>Start with what you need, add modules as you grow. Tell us about your business and we&rsquo;ll come back with one specific idea.</p>
                     <div class="btn-row">
                         <a href="contact.html" class="btn" onclick="gtag('event', 'cta_click', {'button_label': 'Landing2 CTA'})"><span>Start the conversation</span><span class="arrow">&rarr;</span></a>
-                        <a href="work.html" class="btn btn-ghost"><span>See our work</span></a>
+                        <a href="services.html" class="btn btn-ghost"><span>See all services</span></a>
+                    </div>
+                    <div class="stat-row">
+                        <span>Calls answered</span>
+                        <span>WhatsApp handled</span>
+                        <span>Bookings filled</span>
+                        <span>Customers returning</span>
                     </div>
                 </div>
             </div>
@@ -233,11 +257,11 @@
     <div id="site-footer"></div>
 
     <!-- components -->
-    <script src="js/components.js?v=20261108-landing2"></script>
+    <script src="js/components.js?v=20261108-ba"></script>
     <!-- site behaviour -->
-    <script src="js/site.js?v=20261108-landing2"></script>
-    <!-- film scrubbing -->
-    <script src="js/landing2.js?v=20261108-landing2" defer></script>
+    <script src="js/site.js?v=20261108-ba"></script>
+    <!-- before/after sliders -->
+    <script src="js/landing2.js?v=20261108-ba" defer></script>
 
 </body>
 
