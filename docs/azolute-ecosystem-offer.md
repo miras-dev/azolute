@@ -114,35 +114,12 @@ pricing sits at the market level while our costs sit far below it.
 
 ## First ten clients: the financial plan
 
-Target mix and revenue:
-
-| | Clients | Monthly | Setup (one-time) |
-|---|---|---|---|
-| Starter (€149 + €490) | 4 | €596 | €1,960 |
-| Growth (€299 + €790) | 4 | €1,196 | €3,160 |
-| Full (€499 + €1,290) | 2 | €998 | €2,580 |
-| **Total** | **10** | **€2,790 MRR** (€33,480 ARR) | **€7,700** |
-
-Monthly operating budget at ten clients:
-
-| | €/month |
-|---|---|
-| Infrastructure (all ten clients) | ~650 |
-| Founder pay | 1,275 |
-| Overhead & sales | 300 |
-| Contingency | 120 |
-| **Operating profit** | **~445 (≈15.9% margin)** |
-
-Rules:
-- Founder pay is a cost, separate from profit; profit stays in the company
-  unless formally distributed
-- Setup revenue (€7,700) is the cash buffer: it covers roughly three months
-  of operating costs while the client base builds
-- The cost base is mostly fixed, so each client beyond ten lands at ~80%
-  margin: client #11 onward is where the margin grows past 20%
-- After ten clients, raise prices for NEW clients only; existing clients
-  keep their rate
-- Goal: pay the founder consistently and hold a 15-20% operating margin
+The full business model, financial plan and execution strategy live in
+**docs/azolute-business-plan.md** (the authoritative version). Snapshot:
+4/4/2 client mix, €2,790 MRR, €7,700 setup revenue, €2,345/month operating
+budget with founder pay (51h × €25) as a real cost, €445/month retained
+surplus (~15.9%), founding-client pricing raised for new clients only
+after ten (€169/€339/€569).
 
 ## Phase plan
 
