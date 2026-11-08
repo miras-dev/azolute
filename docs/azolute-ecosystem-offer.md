@@ -70,6 +70,79 @@ Typical hard cost to us: €90–130/mo. Margin at all tiers: 70–80%+.
 - Additional location / branch: +50% of tier price per location
 - Additional language for the agents: priced per language (Arabic voice: after validation)
 - Custom integrations beyond scope: quoted as small projects
+- Content Engine (below): Lite €99/mo or Pro €229/mo
+
+## Add-on: CONTENT ENGINE
+
+Social content, produced by AI, approved by the owner, published
+automatically to Instagram and YouTube. The owner is the editor-in-chief;
+the AI is the production team. Nothing publishes without their tap.
+
+### Content Engine LITE — €99/month (+ €190 setup)
+
+| Deliverable | Detail |
+|---|---|
+| 12 Instagram posts/month (~3/week) | AI-drafted caption + hashtags + visual: the owner's photos (enhanced, brand-framed), branded template graphics, or AI-generated brand artwork |
+| Up to 4 YouTube uploads/month | Owner supplies the clip; we handle title, description, tags, templated thumbnail, scheduling, publishing |
+| One-tap WhatsApp approval | Every post previews in the owner's WhatsApp: Approve / Edit / Skip. Plain-language edits regenerate the draft |
+| Monthly content calendar | Auto-suggested from offers, events, seasonality and past performance; approved in the same flow |
+| Performance line in the owner's report | Posts, reach, likes, best of the week |
+
+Setup (€190): Instagram Business + Facebook Page + YouTube linking, API
+verification, 4-6 branded templates, caption voice trained on approved wording.
+
+### Content Engine PRO — €229/month (+ €190 setup)
+
+Everything in Lite, plus the AI creates the material:
+
+| Deliverable | Detail |
+|---|---|
+| 12 AI-generated visuals/month | Brand-styled images from a prompt library built at setup |
+| 4 AI-generated video Reels/Shorts per month | 15-20s clips with music, captions and branded end-card, published to Instagram Reels + YouTube Shorts |
+| One themed monthly campaign | A matched set of visuals + video + copy around one event or offer |
+
+### Not included (printed on every order)
+
+- Filming or video editing: raw clips and photos come from the owner (Lite)
+- Replying to DMs/comments (that is the WhatsApp agent's module)
+- Paid ads management
+- Follower or reach guarantees
+- Publishing anything the owner has not approved
+
+### Content guardrails
+
+- Real products are shown with real photos; AI visuals are illustrative /
+  branded style only (an AI-invented dish photo is a complaint waiting to
+  happen). Same no-fabricated-content rule as the rest of Azolute.
+- Platform AI-disclosure flags (Meta, YouTube) are set automatically on
+  realistic synthetic media.
+
+### Production pipeline and unit economics
+
+Stills: gemini-2.5-flash-image (~$0.04/image). Video: Veo 3.1 Fast via the
+same Gemini API (~$0.10/second) animating our own stills (image-to-video
+keeps every clip on-brand); full Veo 3.1 (~$0.40/s) for the monthly hero
+piece; FFmpeg assembles clips + branded intro/end-card + captions, so only
+8-12s of each Reel is generated. The n8n video step is a provider-agnostic
+adapter with fal.ai (Kling/Seedance/MiniMax) as the swap layer, because
+this market reprices quarterly.
+
+Higgsfield is deliberately NOT in the pipeline: it is a creator platform
+reselling the same models at a markup, its developer API has a ~$700
+prepaid floor against our ~€10-25/client/month need, and its strengths
+(hand-tuned camera work) apply when a human crafts one video, not when a
+pipeline produces forty. A cheap creator subscription remains an optional
+artisan tool for Azolute's own marketing and occasional hero pieces.
+
+| | Lite | Pro |
+|---|---|---|
+| Price | €99/mo | €229/mo |
+| Hard cost | ~€4/mo | ~€15-25/mo |
+| Founder time after setup | ~1h/mo | ~1-2h/mo |
+| Gross margin | ~90% | ~85% |
+
+Overage and extras: additional posts €5 each or +12 for €49/mo; extra
+platform (TikTok / Facebook cross-post) +€29/mo.
 
 ## What is never included
 

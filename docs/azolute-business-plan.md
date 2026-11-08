@@ -53,6 +53,45 @@ Everything in Growth, plus:
 
 Estimated monthly infrastructure cost: €90–130
 
+### ADD-ON: CONTENT ENGINE (any tier)
+
+AI-produced social content for Instagram and YouTube, always approved by
+the owner in WhatsApp before publishing.
+
+**Lite — €99/month, €190 setup**
+- 12 Instagram posts/month: AI captions + hashtags + visuals from the
+  owner's photos, branded templates or AI brand artwork
+- Up to 4 YouTube uploads/month of owner-supplied clips (title,
+  description, tags, thumbnail, scheduling)
+- Auto-generated monthly content calendar; performance in the owner report
+- Estimated hard cost: ~€4/month; ~90% gross margin
+
+**Pro — €229/month, €190 setup**
+- Everything in Lite, plus 12 fully AI-generated visuals and 4 AI-generated
+  15-20s video Reels/Shorts per month, and one themed monthly campaign
+- Estimated hard cost: ~€15-25/month; ~85% gross margin
+
+Exclusions printed on every order: no filming/video editing, no DM/comment
+management, no paid ads, no follower guarantees, nothing published without
+owner approval.
+
+Content guardrails: real products use real photos (AI visuals are
+illustrative/brand-style only); platform AI-disclosure flags are set
+automatically.
+
+Production stack: gemini-2.5-flash-image for stills (~$0.04/image);
+Veo 3.1 Fast via the Gemini API (~$0.10/s) animating our own stills, full
+Veo (~$0.40/s) for hero pieces; FFmpeg assembly (only 8-12s generated per
+Reel, ~€2-4 per finished Reel); provider-agnostic n8n adapter with fal.ai
+(Kling/Seedance/MiniMax) as the swap layer. Higgsfield excluded from the
+pipeline (reseller markup, ~$700 prepaid API floor, creator-tool strengths
+irrelevant to unattended production); a cheap creator subscription remains
+optional for hand-crafted hero content.
+
+Revenue note: Content Engine is the designated upsell once the daily
+report has earned trust. Three Pro clients add €687 MRR (~25% on top of
+the €2,790 base) with no new fixed costs.
+
 ---
 
 ## 2. Infrastructure & technology stack
