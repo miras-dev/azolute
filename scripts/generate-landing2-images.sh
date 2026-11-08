@@ -69,17 +69,20 @@ gen_after() {
     name="$1"; prompt="$2"
     [ -s "$OUT/$name-after.png" ] && { echo "skip $name-after"; return 0; }
     [ -s "$OUT/$name-before.png" ] || { echo "FAIL $name-after: no before image"; return 1; }
-    body="$(python3 - "$OUT/$name-before.png" "$prompt $AFTER_MOOD $STYLE" <<'PY'
+    # The request body embeds the before image (megabytes of base64), far
+    # beyond the OS argument-size limit, so it must go through a file,
+    # never through curl's argv.
+    python3 - "$OUT/$name-before.png" "$prompt $AFTER_MOOD $STYLE" "$OUT/.req.json" <<'PY'
 import base64, json, sys
 img = base64.b64encode(open(sys.argv[1], "rb").read()).decode()
-print(json.dumps({"contents":[{"parts":[
+json.dump({"contents":[{"parts":[
   {"inlineData":{"mimeType":"image/png","data":img}},
   {"text":sys.argv[2]}]}],
- "generationConfig":{"responseModalities":["TEXT","IMAGE"]}}))
+ "generationConfig":{"responseModalities":["TEXT","IMAGE"]}}, open(sys.argv[3], "w"))
 PY
-)"
     status="$(curl -sS -o "$OUT/.resp.json" -w "%{http_code}" -H "x-goog-api-key: $KEY" \
-        -H "Content-Type: application/json" -X POST "$URL" -d "$body")"
+        -H "Content-Type: application/json" -X POST "$URL" --data-binary @"$OUT/.req.json")"
+    rm -f "$OUT/.req.json"
     [ "$status" = "200" ] && extract "$OUT/.resp.json" "$OUT/$name-after.png" \
         && echo "ok   $name-after" || echo "FAIL $name-after: HTTP $status"
 }
