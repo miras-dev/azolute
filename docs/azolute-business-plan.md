@@ -352,6 +352,21 @@ engineering work.
 
 ---
 
+## 12b. Sales discipline and the e-commerce track
+
+The sales process, qualification checklists, success metrics, custom
+pricing framework and the draft e-commerce catalogue live in
+**docs/azolute-sales-playbook.md**. The rules that bind this plan:
+
+- No prices quoted during discovery calls; proposals within 48 hours from
+  the standardised framework
+- Custom work is priced at the €45/hour external rate minimum, never at
+  the €25/hour internal compensation rate; 60% minimum gross margin
+- The Starter/Growth/Full catalogue serves appointment-based service
+  businesses; e-commerce customers get the separate (draft) Commerce
+  track, piloted with at most one client until delivery costs are
+  validated
+
 ## 13. Core business principles
 
 1. Sell managed AI automation services, not software licences alone
