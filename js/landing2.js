@@ -16,6 +16,33 @@
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    /* showcase scene tabs: swap the pair, keep the slider interactive */
+    var tabs = document.querySelectorAll('.scene-tabs [data-scene]');
+    var showcase = document.getElementById('showcaseCard');
+    var hint = document.getElementById('showcaseHint');
+    if (tabs.length && showcase) {
+        // preload all pairs so switching is instant
+        tabs.forEach(function (t) {
+            ['before', 'after'].forEach(function (s) {
+                var img = new Image();
+                img.src = 'img/landing2/' + t.dataset.scene + '-' + s + '.webp';
+            });
+        });
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                tabs.forEach(function (t) {
+                    t.classList.toggle('active', t === tab);
+                    t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+                });
+                showcase.querySelector('.ba-before').src = 'img/landing2/' + tab.dataset.scene + '-before.webp';
+                showcase.querySelector('.ba-after').src = 'img/landing2/' + tab.dataset.scene + '-after.webp';
+                if (hint) hint.textContent = tab.dataset.hint || '';
+                if (showcase.resetSlider) showcase.resetSlider();
+            });
+        });
+    }
+
     document.querySelectorAll('.ba-card').forEach(function (card) {
         var after = card.querySelector('.ba-after');
         var handle = card.querySelector('.ba-handle');
@@ -90,6 +117,23 @@
         }
         card.addEventListener('pointerup', endDrag);
         card.addEventListener('pointercancel', endDrag);
+
+        /* a scene switch re-plays a quick reveal from the current position */
+        card.resetSlider = function () {
+            played = true;
+            var start = null, from = pos, to = 0.55, dur = 650;
+            function tick(ts) {
+                if (dragging) return;
+                if (start === null) start = ts;
+                var t = Math.min(1, (ts - start) / dur);
+                var e = 1 - Math.pow(1 - t, 3);
+                pos = from + (to - from) * e;
+                render();
+                if (t < 1) requestAnimationFrame(tick);
+            }
+            if (!reducedMotion) requestAnimationFrame(tick);
+            else { pos = 0.5; render(); }
+        };
 
         /* keyboard access on the handle */
         handle.addEventListener('keydown', function (e) {
