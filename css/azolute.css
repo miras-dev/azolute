@@ -1218,6 +1218,161 @@ a.card:focus-visible {
     .landing-copy { -webkit-backdrop-filter: none; backdrop-filter: none; background: #0b0b13; }
 }
 
+/* ---------- Landing v2: before/after film ---------- */
+.playhead {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 120;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.playhead .fill {
+    height: 100%;
+    width: 0;
+    background: var(--gradient);
+    transition: width 80ms linear;
+}
+
+.film-act { position: relative; }
+
+.film-act .stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.stage .scene-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.stage .img-after { clip-path: inset(0 100% 0 0); }
+
+.stage .shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(7, 7, 13, 0.55), rgba(7, 7, 13, 0.15) 35%, rgba(7, 7, 13, 0.65));
+    pointer-events: none;
+}
+
+.film-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: clamp(2rem, 7vh, 4.5rem);
+    z-index: 5;
+}
+
+.film-caption .cap-card {
+    max-width: 34rem;
+    background: rgba(10, 10, 18, 0.62);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--line);
+    border-top-color: rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.7rem;
+}
+
+.cap-tag {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 0.7rem;
+}
+
+.cap-tag.before { background: rgba(255, 255, 255, 0.1); color: var(--text-soft); }
+.cap-tag.after { background: var(--accent); color: #fff; }
+
+.cap-card h3 { font-size: clamp(1.25rem, 2.4vw, 1.7rem); margin-bottom: 0.3rem; }
+.cap-card p { color: var(--text-soft); margin: 0; font-size: 0.98rem; }
+
+/* vignettes */
+.vignette { position: absolute; inset: 0; opacity: 0; }
+
+/* the turn */
+.turn-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2vw;
+    transform: translateX(-50%) scaleY(0);
+    transform-origin: center;
+    background: var(--gradient);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.turn-copy {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 6;
+    opacity: 0;
+    padding-inline: var(--gutter);
+}
+
+.turn-copy h2 {
+    max-width: 22ch;
+    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* wipes */
+.wipe-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    transform: translateX(-50%);
+    background: var(--gradient);
+    box-shadow: 0 0 24px 4px var(--accent-glow);
+    z-index: 4;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cap-before, .cap-after { transition: none; }
+.film-caption .cap-after { position: absolute; left: 0; right: 0; bottom: 0; opacity: 0; }
+.film-caption { position: absolute; }
+.film-caption .cap-stack { position: relative; }
+
+/* act heights give the scrub room */
+.act-vignettes { height: 320vh; }
+.act-turn { height: 240vh; }
+.act-wipe { height: 260vh; }
+
+@media (prefers-reduced-motion: reduce) {
+    .act-vignettes, .act-turn, .act-wipe { height: auto; }
+    .film-act .stage { position: relative; height: 70vh; }
+    .vignette { position: relative; opacity: 1 !important; height: 70vh; }
+    .act-vignettes .stage { height: auto; }
+    .stage .img-after { clip-path: inset(0 50% 0 0) !important; }
+    .turn-copy, .cap-after { opacity: 1 !important; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .film-caption .cap-card { -webkit-backdrop-filter: none; backdrop-filter: none; background: #0b0b13; }
+}
+
 /* ---------- Scroll reveal ---------- */
 .js .reveal {
     opacity: 0;
