@@ -27,10 +27,13 @@ with the brand violet. If the script fails to load, the section falls
 back to the email card after 8 seconds; setting
 `booking.enabled: false` shows that fallback permanently.
 
-## 3. AI chat widget (currently dark)
+## 3. AI chat widget (live)
 
-The widget ships dark (`chat.enabled: false`) until the n8n webhook is
-live and publicly reachable over HTTPS.
+Live since 2026-11-09: `chat.enabled: true`, with `chat.webhookUrl` set
+to `https://n8n-jrkw.srv2144760.hstgr.cloud/webhook/azolute-site-chat`
+(n8n on the Hostinger VPS, Claude Haiku). Set `chat.enabled: false` to
+hide the widget. The steps below are how the workflow was set up, kept
+for rebuilding it.
 
 1. Import `docs/n8n/azolute-site-chat.json` into n8n
    (Workflows, Import from File).
@@ -69,7 +72,7 @@ contact email) and instructs the agent to decline anything off-topic
 and point to the contact page. Edit it in the **Site Assistant** node
 if the approved facts change.
 
-## 4. Contact form intake
+## 4. Contact form intake (not yet wired)
 
 The form on `contact.html` works today with no webhook: it opens the
 visitor's email app pre-filled (mailto fallback), and the email button

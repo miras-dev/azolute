@@ -28,13 +28,13 @@ window.AZOLUTE_CONFIG = {
         calLink: 'miras-mujeeb-v6smew/15min'
     },
 
-    /* AI chat widget. Dark until the n8n webhook is live.
+    /* AI chat widget (live). Set enabled: false to hide it.
        webhookUrl: the production URL of the imported workflow in
        docs/n8n/azolute-site-chat.json, e.g.
        https://n8n.azolute.one/webhook/azolute-site-chat */
     chat: {
-        enabled: false,
-        webhookUrl: ''
+        enabled: true,
+        webhookUrl: 'https://n8n-jrkw.srv2144760.hstgr.cloud/webhook/azolute-site-chat'
     },
 
     /* Contact form intake. Empty = the form falls back to opening the
