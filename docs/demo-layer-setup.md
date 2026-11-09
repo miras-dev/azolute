@@ -72,7 +72,15 @@ contact email) and instructs the agent to decline anything off-topic
 and point to the contact page. Edit it in the **Site Assistant** node
 if the approved facts change.
 
-## 4. Contact form intake (not yet wired)
+## 4. Contact form intake (live)
+
+Live since 2026-11-09: `contactForm.webhookUrl` is
+`https://n8n-jrkw.srv2144760.hstgr.cloud/webhook/azolute-contact`.
+Email goes out through Google Workspace SMTP (`smtp.gmail.com`, port
+465, an app password for `miras@azolute.one`); Gmail rewrites the From
+address to that mailbox. If the webhook errors or takes over 20s the
+form shows an error pointing to the email address. The steps below are
+how the workflow was set up, kept for rebuilding it.
 
 The form on `contact.html` works today with no webhook: it opens the
 visitor's email app pre-filled (mailto fallback), and the email button

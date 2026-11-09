@@ -42,7 +42,7 @@ window.AZOLUTE_CONFIG = {
        docs/n8n/azolute-contact-intake.json, e.g.
        https://n8n.azolute.one/webhook/azolute-contact */
     contactForm: {
-        webhookUrl: ''
+        webhookUrl: 'https://n8n-jrkw.srv2144760.hstgr.cloud/webhook/azolute-contact'
     },
 
     /* Live proof strip on ecosystem.html. The strip stays hidden until
