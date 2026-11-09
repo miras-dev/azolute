@@ -14,7 +14,10 @@
       "name": "Contact Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 0],
+      "position": [
+        0,
+        0
+      ],
       "webhookId": "azolute-contact"
     },
     {
@@ -54,13 +57,17 @@
       "name": "Real Enquiry?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [220, 0]
+      "position": [
+        220,
+        0
+      ]
     },
     {
       "parameters": {
         "fromEmail": "Azolute Website <noreply@azolute.one>",
         "toEmail": "miras@azolute.one",
         "subject": "={{ 'Website enquiry from ' + ($json.body.name || 'unknown') }}",
+        "emailFormat": "text",
         "text": "={{ 'New enquiry from azolute.one\\n\\nName: ' + ($json.body.name || '') + '\\nEmail: ' + ($json.body.email || '') + '\\nBusiness: ' + ($json.body.business || 'not given') + '\\nPage: ' + ($json.body.page || '') + '\\nSubmitted: ' + ($json.body.submittedAt || '') + '\\n\\nMessage:\\n' + ($json.body.message || '') + '\\n\\nDelivered by the Azolute Contact Intake workflow.' }}",
         "options": {}
       },
@@ -68,21 +75,28 @@
       "name": "Notify Miras",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [440, -80]
+      "position": [
+        440,
+        -80
+      ]
     },
     {
       "parameters": {
         "fromEmail": "Miras at Azolute <miras@azolute.one>",
-        "toEmail": "={{ $json.body.email }}",
+        "toEmail": "={{ $('Contact Webhook').item.json.body.email }}",
         "subject": "Your message to Azolute arrived",
-        "text": "={{ 'Hi ' + ($json.body.name || 'there') + ',\\n\\nYour enquiry just landed, logged and routed automatically by the same automation stack we install for clients. That is the point: you sent a form, the system did the admin.\\n\\nMiras reads every message personally and will reply from this address, usually within one business day.\\n\\nYour message, for reference:\\n' + ($json.body.message || '') + '\\n\\nAzolute AI Technologies\\nhttps://azolute.one' }}",
+        "emailFormat": "text",
+        "text": "={{ 'Hi ' + ($('Contact Webhook').item.json.body.name || 'there') + ',\\n\\nYour enquiry just landed, logged and routed automatically by the same automation stack we install for clients. That is the point: you sent a form, the system did the admin.\\n\\nMiras reads every message personally and will reply from this address, usually within one business day.\\n\\nYour message, for reference:\\n' + ($('Contact Webhook').item.json.body.message || '') + '\\n\\nAzolute AI Technologies\\nhttps://azolute.one' }}",
         "options": {}
       },
       "id": "b1000000-0000-4000-8000-000000000004",
       "name": "Acknowledge Enquirer",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [660, -80],
+      "position": [
+        660,
+        -80
+      ],
       "onError": "continueRegularOutput"
     },
     {
@@ -94,7 +108,10 @@
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [880, -80]
+      "position": [
+        880,
+        -80
+      ]
     },
     {
       "parameters": {
@@ -105,7 +122,10 @@
       "name": "Respond OK (silent drop)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [440, 120]
+      "position": [
+        440,
+        120
+      ]
     }
   ],
   "connections": {
