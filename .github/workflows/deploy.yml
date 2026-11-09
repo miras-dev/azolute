@@ -32,11 +32,22 @@ jobs:
             --cache-control "no-cache, no-store, must-revalidate" \
             --content-type "text/html"
 
+      # data/*.json is live data an n8n cron overwrites (e.g. data/stats.json):
+      # it must never get the one-year immutable cache of the assets step.
+      - name: Deploy live data (no-cache)
+        run: |
+          aws s3 sync . s3://${{ secrets.S3_BUCKET }} \
+            --exclude "*" \
+            --include "data/*.json" \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "application/json"
+
       - name: Deploy assets (long-cache)
         run: |
           aws s3 sync . s3://${{ secrets.S3_BUCKET }} \
             --exclude ".git/*" \
             --exclude ".github/*" \
+            --exclude "data/*" \
             --exclude ".claude/*" \
             --exclude "scripts/*" \
             --exclude "docs/*" \

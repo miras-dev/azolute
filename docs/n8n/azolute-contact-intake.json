@@ -1,0 +1,168 @@
+{
+  "name": "Azolute Contact Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "azolute-contact",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "b1000000-0000-4000-8000-000000000001",
+      "name": "Contact Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "azolute-contact"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.website || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.body.email || '' }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000002",
+      "name": "Real Enquiry?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "Azolute Website <noreply@azolute.one>",
+        "toEmail": "miras@azolute.one",
+        "subject": "={{ 'Website enquiry from ' + ($json.body.name || 'unknown') }}",
+        "text": "={{ 'New enquiry from azolute.one\\n\\nName: ' + ($json.body.name || '') + '\\nEmail: ' + ($json.body.email || '') + '\\nBusiness: ' + ($json.body.business || 'not given') + '\\nPage: ' + ($json.body.page || '') + '\\nSubmitted: ' + ($json.body.submittedAt || '') + '\\n\\nMessage:\\n' + ($json.body.message || '') + '\\n\\nDelivered by the Azolute Contact Intake workflow.' }}",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000003",
+      "name": "Notify Miras",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [440, -80]
+    },
+    {
+      "parameters": {
+        "fromEmail": "Miras at Azolute <miras@azolute.one>",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "Your message to Azolute arrived",
+        "text": "={{ 'Hi ' + ($json.body.name || 'there') + ',\\n\\nYour enquiry just landed, logged and routed automatically by the same automation stack we install for clients. That is the point: you sent a form, the system did the admin.\\n\\nMiras reads every message personally and will reply from this address, usually within one business day.\\n\\nYour message, for reference:\\n' + ($json.body.message || '') + '\\n\\nAzolute AI Technologies\\nhttps://azolute.one' }}",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000004",
+      "name": "Acknowledge Enquirer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [660, -80],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}"
+      },
+      "id": "b1000000-0000-4000-8000-000000000005",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [880, -80]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}"
+      },
+      "id": "b1000000-0000-4000-8000-000000000006",
+      "name": "Respond OK (silent drop)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 120]
+    }
+  ],
+  "connections": {
+    "Contact Webhook": {
+      "main": [
+        [
+          {
+            "node": "Real Enquiry?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Real Enquiry?": {
+      "main": [
+        [
+          {
+            "node": "Notify Miras",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond OK (silent drop)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Miras": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge Enquirer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acknowledge Enquirer": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

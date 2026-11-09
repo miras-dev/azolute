@@ -1,0 +1,9 @@
+{
+  "_comment": "SAMPLE schema for data/stats.json. Do NOT commit real or made-up numbers to the repo; an n8n cron writes the real file straight to S3 (see docs/demo-layer-setup.md). The proof strip on ecosystem.html stays hidden until data/stats.json exists, parses, and 'updated' is less than 30 days old.",
+  "updated": "2026-11-09T08:00:00Z",
+  "stats": [
+    { "label": "Enquiries answered this week", "value": "0" },
+    { "label": "Bookings confirmed this week", "value": "0" },
+    { "label": "Median reply time", "value": "0s" }
+  ]
+}

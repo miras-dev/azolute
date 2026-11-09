@@ -33,6 +33,7 @@
 
     <!-- Azolute stylesheet -->
     <link rel="stylesheet" href="css/azolute.css">
+    <link rel="stylesheet" href="css/demo.css?v=20261109-demo">
 
     <title>Contact | Azolute AI Technologies</title>
 
@@ -73,19 +74,47 @@
             <div class="container">
                 <div class="contact-grid">
                     <div class="reveal">
-                        <h2>Email Miras</h2>
-                        <p class="muted">The fastest way to start is a short email. A few things worth including:</p>
+                        <h2>Tell us what to automate</h2>
+
+                        <form class="contact-form" id="contactForm" novalidate>
+                            <div class="form-row">
+                                <label for="cfName">Name</label>
+                                <input type="text" id="cfName" name="name" required autocomplete="name" placeholder="Your name">
+                            </div>
+                            <div class="form-row">
+                                <label for="cfEmail">Email</label>
+                                <input type="email" id="cfEmail" name="email" required autocomplete="email" placeholder="you@yourbusiness.com">
+                            </div>
+                            <div class="form-row">
+                                <label for="cfBusiness">Business <span class="muted" style="font-weight:400;">(optional)</span></label>
+                                <input type="text" id="cfBusiness" name="business" autocomplete="organization" placeholder="What your business does">
+                            </div>
+                            <div class="form-row">
+                                <label for="cfMessage">Your message</label>
+                                <textarea id="cfMessage" name="message" rows="5" required placeholder="What would you like to build or automate? Which tools do you already use?"></textarea>
+                            </div>
+                            <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+                            <button class="btn" type="submit"><span>Send enquiry</span><span class="arrow">&rarr;</span></button>
+                            <p class="form-note" id="contactFormNote"></p>
+                            <div class="form-status" id="contactFormStatus" role="status" aria-live="polite"></div>
+                        </form>
+
+                        <div class="form-success" id="contactSuccess" hidden tabindex="-1">
+                            <span class="check" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></svg>
+                            </span>
+                            <h3>Received.</h3>
+                            <p>Your enquiry just went through the same intake automation we install for clients: logged, routed and acknowledged in seconds. Miras reads every message personally and will reply from miras@azolute.one.</p>
+                        </div>
+                    </div>
+                    <div class="reveal" data-delay="1">
+                        <p class="muted">A few things worth including:</p>
                         <ul class="check-list">
                             <li>What your business does and who your customers are</li>
                             <li>What you would like to build or improve: a website, an app or a specific process</li>
                             <li>The tools you already use (CRM, booking, email, spreadsheets…)</li>
                             <li>Any timeline you have in mind</li>
                         </ul>
-                        <div class="btn-row">
-                            <a href="mailto:miras@azolute.one" class="btn" onclick="gtag('event', 'cta_click', {'button_label': 'Email Miras'})"><span>Write an email</span><span class="arrow">&rarr;</span></a>
-                        </div>
-                    </div>
-                    <div class="reveal" data-delay="1">
                         <ul class="info-list">
                             <li>
                                 <span class="label">Email</span>
@@ -105,6 +134,18 @@
             </div>
         </section>
 
+        <!-- BOOK A CALL -->
+        <section class="section" id="book">
+            <div class="container">
+                <div class="section-head reveal">
+                    <span class="eyebrow">Or book directly</span>
+                    <h2>Fifteen minutes, <span class="grad-text">straight into the calendar</span></h2>
+                    <p class="lead">Pick a slot and it lands in both calendars with confirmation and reminder, the same booking flow we wire in for clients.</p>
+                </div>
+                <div class="booking-embed reveal" data-cal-mount></div>
+            </div>
+        </section>
+
     </main>
 
     <div id="site-footer"></div>
@@ -115,6 +156,11 @@
     <script src="js/site.js?v=20261106-redesign"></script>
     <!-- three.js hero scene -->
     <script type="module" src="js/hero-scene.js?v=20261106-redesign"></script>
+    <!-- demo layer: config, WhatsApp + AI chat, booking, contact intake -->
+    <script src="js/site-config.js?v=20261109-demo"></script>
+    <script src="js/chat-widget.js?v=20261109-demo" defer></script>
+    <script src="js/booking.js?v=20261109-demo" defer></script>
+    <script src="js/contact-form.js?v=20261109-demo" defer></script>
 
 </body>
 
