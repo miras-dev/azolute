@@ -10,31 +10,22 @@ After editing `js/site-config.js`, bump the `?v=` on its script tags
 (all six nav pages) so the year-long CloudFront asset cache does not
 serve the old config.
 
-## 1. WhatsApp button (live by default)
+## 1. WhatsApp button (live)
 
-`whatsapp.number` is currently `4915754335532` (the number from the
-outreach signature). **Confirm this is the business WhatsApp** before
-merging to main; change it in `js/site-config.js` if not. Digits only,
-international format, no `+`. Set `whatsapp.enabled: false` to hide the
-button entirely.
+`whatsapp.number` is `919207404868` (confirmed by the owner,
+2026-11-09). Digits only, international format, no `+`. Set
+`whatsapp.enabled: false` to hide the button entirely.
 
-## 2. Cal.com booking (5-minute setup)
+## 2. Cal.com booking (live)
 
-Currently off; the booking sections on `ecosystem.html` and
-`contact.html` show an email fallback instead of a broken box.
-
-1. Create a free account at https://cal.com (sign up with Google so it
-   reads the business calendar).
-2. It creates a default "15 Min Meeting" event type; rename it if you
-   like and connect Google Meet or phone as the location.
-3. Your link is shown on the event type, e.g. `miras-abc/15min`
-   (the part after `cal.com/`).
-4. In `js/site-config.js` set `booking.calLink` to that value and
-   `booking.enabled: true`.
+`booking.calLink` is `miras-mujeeb-v6smew/15min`, shown inline on
+`ecosystem.html` and `contact.html`, with a secondary "Ask Claude to
+book the call" link (Cal's copy-prompt flow via mcp.cal.com).
 
 The embed loads Cal's official script from `app.cal.com`, themed dark
 with the brand violet. If the script fails to load, the section falls
-back to the email card after 8 seconds.
+back to the email card after 8 seconds; setting
+`booking.enabled: false` shows that fallback permanently.
 
 ## 3. AI chat widget (currently dark)
 

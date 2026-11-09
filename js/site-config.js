@@ -15,7 +15,7 @@ window.AZOLUTE_CONFIG = {
        number: international format, digits only, no "+", no spaces. */
     whatsapp: {
         enabled: true,
-        number: '4915754335532',
+        number: '919207404868',
         prefill: 'Hi Azolute, I found you through your website.'
     },
 
@@ -24,8 +24,8 @@ window.AZOLUTE_CONFIG = {
        While enabled is false the booking sections show a styled
        email fallback instead of the calendar. */
     booking: {
-        enabled: false,
-        calLink: 'REPLACE-WITH-YOUR-CAL-LINK/15min'
+        enabled: true,
+        calLink: 'miras-mujeeb-v6smew/15min'
     },
 
     /* AI chat widget. Dark until the n8n webhook is live.

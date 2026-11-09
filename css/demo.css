@@ -334,6 +334,16 @@
 
 .booking-fallback .btn-row { justify-content: center; }
 
+.booking-alt {
+    margin: 0.9rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    text-align: center;
+}
+
+.booking-alt a { color: var(--accent-soft); }
+.booking-alt a:hover { text-decoration: underline; }
+
 /* ---------- Contact form ---------- */
 .contact-form .form-row {
     display: flex;
