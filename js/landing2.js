@@ -2,9 +2,9 @@
  * Azolute, landing variation 2: interactive before/after sliders
  *
  * Each .ba-card holds a before and an after image of the same scene.
- * When a card first enters the viewport its wipe animates to 55% once
- * (critically damped, no overshoot), then drifts gently left and right
- * around that point to show it moves. The first touch ends the drift
+ * When a card first enters the viewport its wipe animates to the middle
+ * once (critically damped, no overshoot), then sweeps slowly from one
+ * edge of the card to the other and back to show it moves. The first touch ends the drift
  * for good and the visitor owns it: grab anywhere on the card and the
  * divider tracks the pointer 1:1 (pointer capture, no transition lag),
  * or use arrow keys on the handle. The drift pauses while the card is
@@ -59,7 +59,7 @@
         var touched = false;      // the visitor has dragged or keyed: no more drift
         var visible = false;
         var animating = false;    // an entry or scene-switch reveal is running
-        var REST = 0.55;
+        var REST = 0.5;
 
         function render() {
             var pct = pos * 100;
@@ -71,8 +71,9 @@
         }
         render();
 
-        /* idle drift: a slow sine around the rest point until first touch */
-        var SWAY_AMP = 0.13, SWAY_PERIOD = 5600;
+        /* idle drift: a slow edge-to-edge sine until first touch. The amplitude
+           stops just short of the edges so the handle is never clipped. */
+        var SWAY_AMP = 0.47, SWAY_PERIOD = 9000;
         var swayRaf = null, swayLast = null, swayT = 0;
 
         function swayTick(ts) {
@@ -109,7 +110,7 @@
             requestAnimationFrame(tick);
         }
 
-        /* one-time entry reveal: 0 -> 0.55 */
+        /* one-time entry reveal: 0 -> the middle */
         function play() {
             if (played || reducedMotion) return;
             played = true;
