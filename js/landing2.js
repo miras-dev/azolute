@@ -3,9 +3,12 @@
  *
  * Each .ba-card holds a before and an after image of the same scene.
  * When a card first enters the viewport its wipe animates to 55% once
- * (critically damped, no overshoot); after that the visitor owns it:
- * grab anywhere on the card and the divider tracks the pointer 1:1
- * (pointer capture, no transition lag), or use arrow keys on the handle.
+ * (critically damped, no overshoot), then drifts gently left and right
+ * around that point to show it moves. The first touch ends the drift
+ * for good and the visitor owns it: grab anywhere on the card and the
+ * divider tracks the pointer 1:1 (pointer capture, no transition lag),
+ * or use arrow keys on the handle. The drift pauses while the card is
+ * off screen.
  *
  * No scroll-jacking: the page scrolls like a normal landing page.
  * Reduced motion: cards rest at a static 50% split, dragging still works.
@@ -53,6 +56,10 @@
         var pos = reducedMotion ? 0.5 : 0;
         var dragging = false;
         var played = false;
+        var touched = false;      // the visitor has dragged or keyed: no more drift
+        var visible = false;
+        var animating = false;    // an entry or scene-switch reveal is running
+        var REST = 0.55;
 
         function render() {
             var pct = pos * 100;
@@ -64,32 +71,65 @@
         }
         render();
 
-        /* one-time entry reveal: 0 -> 0.55, ease-out, interruptible */
-        function play() {
-            if (played || reducedMotion) return;
-            played = true;
-            var start = null, from = pos, to = 0.55, dur = 1100;
+        /* idle drift: a slow sine around the rest point until first touch */
+        var SWAY_AMP = 0.13, SWAY_PERIOD = 5600;
+        var swayRaf = null, swayLast = null, swayT = 0;
+
+        function swayTick(ts) {
+            if (touched || !visible || animating) { swayRaf = null; return; }
+            if (swayLast !== null) swayT += ts - swayLast;
+            swayLast = ts;
+            pos = REST + SWAY_AMP * Math.sin((swayT / SWAY_PERIOD) * 2 * Math.PI);
+            render();
+            swayRaf = requestAnimationFrame(swayTick);
+        }
+
+        function startSway(restart) {
+            if (reducedMotion || touched || !visible || animating || swayRaf) return;
+            if (restart) swayT = 0;            // the divider is at REST: begin there
+            swayLast = null;
+            swayRaf = requestAnimationFrame(swayTick);
+        }
+
+        /* reveal to the rest point, ease-out, interruptible, then drift */
+        function revealTo(dur) {
+            var start = null, from = pos;
+            animating = true;
             function tick(ts) {
-                if (dragging) return;              // the user grabbed it: they win
+                if (dragging) { animating = false; return; }   // the user grabbed it: they win
                 if (start === null) start = ts;
                 var t = Math.min(1, (ts - start) / dur);
                 var e = 1 - Math.pow(1 - t, 3);    // ease-out cubic, no overshoot
-                pos = from + (to - from) * e;
+                pos = from + (REST - from) * e;
                 render();
-                if (t < 1) requestAnimationFrame(tick);
+                if (t < 1) { requestAnimationFrame(tick); return; }
+                animating = false;
+                startSway(true);
             }
             requestAnimationFrame(tick);
         }
 
+        /* one-time entry reveal: 0 -> 0.55 */
+        function play() {
+            if (played || reducedMotion) return;
+            played = true;
+            revealTo(1100);
+        }
+
         if ('IntersectionObserver' in window) {
             var io = new IntersectionObserver(function (entries) {
-                if (entries[0].isIntersecting) { play(); io.disconnect(); }
+                visible = entries[0].isIntersecting;
+                if (!visible) return;
+                if (!played) play();
+                else startSway(false);
             }, { threshold: 0.45 });
             io.observe(card);
         } else {
             played = true;
-            pos = 0.55;
+            visible = true;
+            pos = REST;
             render();
+            startSway(true);
         }
 
         /* direct manipulation: divider tracks the pointer 1:1 */
@@ -102,6 +142,7 @@
         card.addEventListener('pointerdown', function (e) {
             dragging = true;
             played = true;
+            touched = true;
             card.setPointerCapture(e.pointerId);
             card.classList.add('dragging');
             setFromEvent(e);
@@ -121,17 +162,7 @@
         /* a scene switch re-plays a quick reveal from the current position */
         card.resetSlider = function () {
             played = true;
-            var start = null, from = pos, to = 0.55, dur = 650;
-            function tick(ts) {
-                if (dragging) return;
-                if (start === null) start = ts;
-                var t = Math.min(1, (ts - start) / dur);
-                var e = 1 - Math.pow(1 - t, 3);
-                pos = from + (to - from) * e;
-                render();
-                if (t < 1) requestAnimationFrame(tick);
-            }
-            if (!reducedMotion) requestAnimationFrame(tick);
+            if (!reducedMotion) revealTo(650);
             else { pos = 0.5; render(); }
         };
 
@@ -147,6 +178,7 @@
             else { return; }
             e.preventDefault();
             played = true;
+            touched = true;
             render();
         });
     });
