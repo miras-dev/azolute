@@ -316,7 +316,12 @@
     min-height: 420px;
 }
 
-.booking-embed.booking-live { padding: 6px; }
+/* Cal.com's dark theme paints its frame #171717; the box around it uses
+   the same colour so the calendar and its surround read as one surface. */
+.booking-embed.booking-live {
+    padding: 6px;
+    background: #171717;
+}
 
 .booking-embed.booking-fallback {
     min-height: 0;
