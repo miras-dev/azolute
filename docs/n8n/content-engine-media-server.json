@@ -1,0 +1,255 @@
+{
+  "name": "Content Engine · Media Server",
+  "nodes": [
+    {
+      "id": "921bfc47-f0b6-421d-a031-a5ac89649858",
+      "name": "Media Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "content-media",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "34d733e4-0ed7-4bd1-a6d4-acbb4cb06409"
+    },
+    {
+      "id": "9814c86c-0051-42a3-865e-b66bc398429f",
+      "name": "Sanitize File Name",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "file",
+              "value": "={{ String($json.query?.f ?? \"\").replace(/[^A-Za-z0-9_.-]/g, \"\").replace(/^\\.+/, \"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "8432cc1e-f9c7-4d94-be67-db2cfae1e964",
+      "name": "Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        880,
+        420
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Not found",
+        "options": {
+          "responseCode": 404
+        }
+      }
+    },
+    {
+      "id": "2ead73dd-dd4a-478c-a9f4-37c06d0f725f",
+      "name": "Send Media",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1100,
+        220
+      ],
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "automatically",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "public, max-age=86400"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "56c3cc4f-62fd-407a-bc97-346918d14bf8",
+      "name": "Sticky Note bc02de60",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        208
+      ],
+      "parameters": {
+        "content": "## Content Engine media server\nServes images the Content Engine stored in the `content_media` data table, so Instagram and the WhatsApp preview can fetch them by URL.\n\nURL: `/webhook/content-media?f=<media_key>`\nThe key is stripped to letters, digits and `_ . -`. Unknown keys get a 404. Rows are deleted once a post is published or skipped.",
+        "color": 5,
+        "width": 1340,
+        "height": 224
+      }
+    },
+    {
+      "id": "7f8f3755-8d26-42a0-a8a6-351e3d56db6e",
+      "name": "Find Media Row",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "content_media",
+          "mode": "list",
+          "value": "NrQdF12IGWYP5nca"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "condition": "eq",
+              "keyName": "media_key",
+              "keyValue": "={{ $json.file || '__none__' }}"
+            }
+          ]
+        },
+        "limit": 1,
+        "matchType": "allConditions",
+        "operation": "get",
+        "resource": "row"
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "6066c68b-b63f-4eb1-9f82-ecf1c5345997",
+      "name": "Media Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-b64",
+              "leftValue": "={{ $json.b64 }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e7e65629-d766-4ac3-9ad5-861d6ec4f3eb",
+      "name": "Decode Image",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        220
+      ],
+      "parameters": {
+        "operation": "toBinary",
+        "options": {
+          "fileName": "={{ $json.media_key }}",
+          "mimeType": "={{ $json.mime_type || 'image/jpeg' }}"
+        },
+        "sourceProperty": "b64"
+      }
+    }
+  ],
+  "connections": {
+    "Media Request": {
+      "main": [
+        [
+          {
+            "node": "Sanitize File Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitize File Name": {
+      "main": [
+        [
+          {
+            "node": "Find Media Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Media Row": {
+      "main": [
+        [
+          {
+            "node": "Media Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Media Exists?": {
+      "main": [
+        [
+          {
+            "node": "Decode Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode Image": {
+      "main": [
+        [
+          {
+            "node": "Send Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

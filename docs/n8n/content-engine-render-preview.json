@@ -1,0 +1,744 @@
+{
+  "name": "Content Engine · Render & Preview",
+  "nodes": [
+    {
+      "id": "9d4c95a8-8fc5-4c71-a0cf-38bb35eb2616",
+      "name": "Render Request",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "post_id",
+              "type": "string"
+            },
+            {
+              "name": "regenerate_image",
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ad2af62b-6c0e-43d1-a2e6-47523e9cd124",
+      "name": "Get Post",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.post_id }}"
+            }
+          ]
+        },
+        "limit": 1
+      }
+    },
+    {
+      "id": "a6c500c4-7f89-4594-8469-679a18fe3ed5",
+      "name": "Get Settings",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "FgcxxifTQHm8YADN",
+          "cachedResultName": "content_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "client_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.client_key }}"
+            }
+          ]
+        },
+        "limit": 1
+      }
+    },
+    {
+      "id": "28f99c3f-af21-4c66-ac7d-09adf8366032",
+      "name": "Needs New Image?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "needs-image",
+              "leftValue": "={{ $('Render Request').first().json.regenerate_image === true || !$('Get Post').first().json.media_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f64b18ae-7539-46c9-8fe3-d4cc46c1b6e1",
+      "name": "Clear Old Media",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "NrQdF12IGWYP5nca",
+          "cachedResultName": "content_media"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Post').first().json.post_id }}"
+            }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ec05fddb-017f-4e26-82fd-dd2bb49d1bee",
+      "name": "Generate Image",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        160
+      ],
+      "parameters": {
+        "resource": "image",
+        "operation": "generate",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "models/gemini-2.5-flash-image"
+        },
+        "prompt": "={{ $('Get Post').first().json.image_prompt }}\n\nStyle: {{ $('Get Settings').first().json.image_style }}",
+        "options": {
+          "binaryPropertyOutput": "data"
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "fd1676b3-3e63-4922-bed3-ec3390890d07",
+      "name": "To Instagram JPEG",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        160
+      ],
+      "parameters": {
+        "operation": "resize",
+        "width": 1080,
+        "height": 1080,
+        "resizeOption": "ignoreAspectRatio",
+        "options": {
+          "format": "jpeg",
+          "quality": 88,
+          "fileName": "post.jpg"
+        }
+      }
+    },
+    {
+      "id": "18e36c31-023b-4600-b468-1451675a37d9",
+      "name": "Image To Base64",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        160
+      ],
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "b64"
+      }
+    },
+    {
+      "id": "5f022d13-d00d-4a8d-abdd-8287efd3de5b",
+      "name": "Store Media",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1780,
+        160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "NrQdF12IGWYP5nca",
+          "cachedResultName": "content_media"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "media_key": "={{ $('Get Post').first().json.post_id }}-{{ $now.toMillis() }}.jpg",
+            "post_id": "={{ $('Get Post').first().json.post_id }}",
+            "mime_type": "image/jpeg",
+            "b64": "={{ $json.b64 }}"
+          },
+          "schema": [
+            {
+              "id": "media_key",
+              "displayName": "media_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mime_type",
+              "displayName": "mime_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "b64",
+              "displayName": "b64",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e6d037f2-da0f-4ee7-9377-bca57593bdc0",
+      "name": "Save Media URL",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2000,
+        160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Post').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "media_file": "={{ $('Store Media').first().json.media_key }}",
+            "media_url": "={{ $('Get Settings').first().json.media_base_url }}{{ $('Store Media').first().json.media_key }}"
+          },
+          "schema": [
+            {
+              "id": "media_file",
+              "displayName": "media_file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "media_url",
+              "displayName": "media_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d7ffb155-eaf8-4e60-868c-cd461431fbb9",
+      "name": "Reload Post",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2220,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Render Request').first().json.post_id }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "a570f2c7-475a-427b-91c6-84f1a5833594",
+      "name": "Mark Preview Failed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2680,
+        460
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Render Request').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "preview_failed",
+            "error": "={{ String($json.error?.message || $json.error?.description || $json.error || $json.message || 'Unknown error').slice(0, 500) }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cebc6b65-4d1e-45e0-909f-af96b4ab3900",
+      "name": "Send Preview To Owner",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2440,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendTemplate",
+        "phoneNumberId": "={{ $('Get Settings').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Settings').first().json.owner_whatsapp }}",
+        "template": "={{ $('Get Settings').first().json.wa_template_name }}|{{ $('Get Settings').first().json.wa_template_lang }}",
+        "components": {
+          "component": [
+            {
+              "type": "header",
+              "headerParameters": {
+                "parameter": [
+                  {
+                    "type": "image",
+                    "imageLink": "={{ $json.media_url }}"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": [
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.topic || 'New post').replace(/\\s+/g, ' ').trim().slice(0, 60) }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ (() => { const c = String($json.caption || '').replace(/\\s*\\n+\\s*/g, ' / ').replace(/\\s{2,}/g, ' ').trim(); return c.length > 850 ? c.slice(0, 850) + '…' : c; })() }}"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "sub_type": "quick_reply",
+              "index": 0,
+              "buttonParameters": {
+                "parameter": {
+                  "type": "payload",
+                  "payload": "=approve:{{ $json.post_id }}"
+                }
+              }
+            },
+            {
+              "type": "button",
+              "sub_type": "quick_reply",
+              "index": 1,
+              "buttonParameters": {
+                "parameter": {
+                  "type": "payload",
+                  "payload": "=edit:{{ $json.post_id }}"
+                }
+              }
+            },
+            {
+              "type": "button",
+              "sub_type": "quick_reply",
+              "index": 2,
+              "buttonParameters": {
+                "parameter": {
+                  "type": "payload",
+                  "payload": "=skip:{{ $json.post_id }}"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "onError": "continueErrorOutput",
+      "webhookId": "629d2706-897b-404b-8916-594bbb379fd1"
+    },
+    {
+      "id": "75b4bd83-e3cf-4082-abf1-874ed95af93f",
+      "name": "Mark Awaiting Approval",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2680,
+        220
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Render Request').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "awaiting_approval",
+            "error": ""
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "45a34f91-5f61-438a-8984-cfc9826c3f84",
+      "name": "Sticky Note bfd0ab85",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -120
+      ],
+      "parameters": {
+        "content": "## Content Engine · Render & Preview\nCalled by **Plan Post** and **Owner Replies** with a `post_id`.\n\n1. Loads the post and its client settings.\n2. If the post has no image yet (or an edit asked for a new one), Gemini draws it, it becomes a 1080×1080 JPEG and is stored in `content_media`, served by the Media Server.\n3. Sends the owner the `content_review` WhatsApp template: image + caption + **Approve / Edit / Skip** (button payloads carry the post id).\n\nFailures set the post to `preview_failed` with the error text.",
+        "color": 5,
+        "width": 640,
+        "height": 300
+      }
+    }
+  ],
+  "connections": {
+    "Render Request": {
+      "main": [
+        [
+          {
+            "node": "Get Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Post": {
+      "main": [
+        [
+          {
+            "node": "Get Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Settings": {
+      "main": [
+        [
+          {
+            "node": "Needs New Image?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs New Image?": {
+      "main": [
+        [
+          {
+            "node": "Clear Old Media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reload Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Old Media": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "To Instagram JPEG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Preview Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "To Instagram JPEG": {
+      "main": [
+        [
+          {
+            "node": "Image To Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image To Base64": {
+      "main": [
+        [
+          {
+            "node": "Store Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Media": {
+      "main": [
+        [
+          {
+            "node": "Save Media URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Media URL": {
+      "main": [
+        [
+          {
+            "node": "Reload Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reload Post": {
+      "main": [
+        [
+          {
+            "node": "Send Preview To Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Preview To Owner": {
+      "main": [
+        [
+          {
+            "node": "Mark Awaiting Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Preview Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
