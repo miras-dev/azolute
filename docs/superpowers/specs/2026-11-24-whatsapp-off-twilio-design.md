@@ -3,6 +3,8 @@
 Date: 2026-11-24. Status: **approved** (owner asked for a cofounder review
 and approval; the review's changes are in "Cofounder review" below).
 Owner's two rules: **nothing breaks**, and it makes our lives easier.
+Revised the same day after a Q&A with the owner: ClashCWL leaves WhatsApp
+(it moved to Discord), and the café gets an owner approval step.
 
 ## Why
 
@@ -23,12 +25,15 @@ Goals
 
 - One receiver (the **WhatsApp Hub** on n8n) gets every incoming message
   and status, logs it, and routes it.
-- Every sender (ClashCWL, the café script, the Content Engine, the inbox)
-  can switch between Twilio and Meta with **one setting**. The code ships
+- Every sender (the café script, the Content Engine, the inbox) can
+  switch between Twilio and Meta with **one setting**. The code ships
   before cutover day, and on cutover day only settings change.
 - The inbox keeps working: read chats, reply, see photos, alerts.
-- Tokens live only in n8n credentials, Lambda environment variables and
-  Script Properties. Never in code, commits or chat.
+- The café owner approves each booking on WhatsApp (Confirm / Decline),
+  and the guest is told from the Azolute AI number. Built behind a
+  setting that stays off until the café owner agrees.
+- Tokens live only in n8n credentials, Script Properties and the inbox's
+  gitignored `.env`. Never in code, commits or chat.
 
 Non-goals
 
@@ -41,10 +46,9 @@ Anti-goals (a failure even if it works)
 
 - A message lost or silently dropped during cutover.
 - A client's chat sent to a system that has no business with it (for
-  example ordinary client chats forwarded to ClashCWL).
-- Anything that shows a defender's name (ClashCWL rule; nothing here
-  touches that, but the Hub must not log ClashCWL alert bodies anywhere
-  public).
+  example a stranger's message treated as a café owner's decision).
+- A guest told "confirmed" for a booking the owner didn't confirm, or
+  told twice.
 - Cutover day needing a code deploy to roll back.
 
 ## What Meta's docs say now (checked 2026-11-24)
@@ -97,11 +101,11 @@ every system still sends directly through the Graph API.
 Considered and not chosen:
 
 - **B, ClashCWL's Lambda stays the receiver** and forwards the rest (as it
-  does with Twilio today). It ties the Content Engine and the inbox to a
-  Clash product's deploys and puts client chats through it.
+  does with Twilio today). Ruled out, and now moot: ClashCWL no longer
+  uses WhatsApp.
 - **C, everything sends through the Hub too** (token only in n8n). Fewer
-  token copies, but the café booking alert and hunter alerts would then
-  fail whenever n8n is down. Kept as an option for later; the Hub's send
+  token copies, but the café's booking alert would then fail whenever n8n
+  is down. Kept as an option for later; the Hub's send
   endpoint (below) makes it easy.
 
 ## Design
@@ -137,14 +141,14 @@ Log table **`wa_messages`** (n8n data table), one row per message:
 | `media_id`, `media_mime` | for media |
 | `status` | for `out`: sent, delivered, read, failed |
 | `error` | Meta's error, if any |
-| `source` | who sent an `out` row: `inbox`, `clashcwl`, `toasty`, `content`, `hub` |
-| `routed_to` | for `in`: `content`, `clashcwl`, `none` |
+| `source` | who sent an `out` row: `inbox`, `toasty`, `content`, `hub` |
+| `routed_to` | for `in`: `content`, `toasty`, `none` |
 | `at` | Meta's timestamp |
 
 Status webhooks update the matching `out` row. Messages sent directly by
 other systems have no row yet, so a status creates one (type and text
 unknown). Senders set Meta's `biz_opaque_callback_data` to their system
-name (`clashcwl`, `toasty`, `content`), which Meta echoes in status
+name (`toasty`, `content`), which Meta echoes in status
 webhooks, so the Hub can fill in `source`. (Builder: confirm this field
 is echoed; if not, `source` stays empty for those rows.)
 
@@ -156,13 +160,13 @@ is echoed; if not, `source` stays empty for those rows.)
    `approve:/edit:/skip:<post_id>`, or any text while one of that
    client's posts is `awaiting_edit`, or a photo: call Owner Replies as a
    sub-workflow with the normalised message.
-2. **ClashCWL** (Azolute's own number only, `AZOLUTE_PHONE_NUMBER_ID`):
-   if the text is one word from STOP / PAUSE / OFF / START / RESUME / ON /
-   STATUS (case and punctuation ignored): POST it to ClashCWL's new
-   inbound endpoint (below). If ClashCWL answers with a reply, the Hub
-   sends it to the hunter and logs it (`source=hub`). ClashCWL itself
-   still ignores numbers that aren't on its alert list, and only these
-   words are ever sent there.
+2. **Café decisions**: a button reply whose payload starts `toasty:`
+   (`toasty:confirm:<booking_id>` or `toasty:decline:<booking_id>`), on
+   Azolute's own number (`AZOLUTE_PHONE_NUMBER_ID`): POST it to the café
+   script (section 5). The script checks the sender is one of the café's
+   owner numbers and answers with a line for the owner; the Hub sends that
+   line back to the owner (free text, inside the window their tap just
+   opened) and logs it (`source=hub`).
 3. **The owner's other messages**: still go to Owner Replies, which
    answers with its "how it works" note, as it does today. (My call:
    keeps today's behaviour; the owner's number is their personal one and
@@ -172,12 +176,12 @@ is echoed; if not, `source` stays empty for those rows.)
 
 **Other businesses' numbers** (my call): when a Content Engine client's
 number is later added to the same Meta app, its traffic reaches the same
-Hub. Only rules 1 and 3 apply to it; it never goes to ClashCWL, and the
+Hub. Only rules 1 and 3 apply to it; it never goes to the café, and the
 inbox API only returns rows for `AZOLUTE_PHONE_NUMBER_ID`. Their chats
 stay in the log, tagged with their `phone_number_id`, for their own
 inbox or agent later.
 
-Routing failures (sub-workflow error, ClashCWL down) are written to the
+Routing failures (sub-workflow error, café script down) are written to the
 row's `error`; the message is already logged, so nothing is lost.
 
 ### 2. Inbox API (on the Hub, same workflow or a sibling)
@@ -214,43 +218,79 @@ Hub key.
 
 ### 4. ClashCWL (`miras-dev/clash-cwl`)
 
-Follows its `AGENTS.md`: read `docs/PLATFORM_PLAN.md` first, update
-`lambda/README.md` and `DEFENSE_SETUP.md`.
-
-- New `lambda/whatsapp.mjs`: `whatsappFromEnv(env)` returns Twilio's
-  sender (`twilioFromEnv`, unchanged) or a new Meta sender, picked by
-  `WHATSAPP_PROVIDER=twilio|meta` (default `twilio`). Both have the same
-  shape `{ send, envNumbers, recipients, template }`, so `watch.mjs` does
-  not change (its parameter keeps the name `twilio`).
-- Meta sender settings: `META_WA_TOKEN`, `META_WA_PHONE_NUMBER_ID`,
-  `META_WA_TEMPLATE` (template name; its one `{{1}}` takes the whole
-  alert through the existing `oneLine`), `META_WA_TEMPLATE_LANG`
-  (default `en`), `META_GRAPH_VERSION`. No template set: free text (only
-  works inside the 24-hour window, as with Twilio today).
-- `index.mjs` uses `whatsappFromEnv()` wherever it used `twilioFromEnv()`
-  for sending.
-- New inbound route `/whatsapp/inbound`: JSON `{from, body}` from the Hub,
-  checked with HMAC-SHA256 over the raw body using `WHATSAPP_HUB_SECRET`
-  (header `X-Hub-Key-Signature`). Calls the existing `watch.inbound` and
-  answers `{reply}` or `{reply:null}`. The old `/twilio/whatsapp` route
-  stays until Twilio is closed, then can be removed.
-- Admin error text that names the Twilio variables names both providers.
-- Tests in `test/watch.test.mjs` (or a new `test/whatsapp.test.mjs`): Meta
-  send request shape (template and free text), provider switch, inbound
-  signature good/bad, STOP/START through the new route.
-- Deployed by the owner, with `WHATSAPP_PROVIDER` still `twilio`.
+ClashCWL no longer uses WhatsApp (hunter alerts moved to Discord). No
+code change (my call: nothing there can break). On cutover day its
+`TWILIO_*` and `WATCH_WHATSAPP_TO` settings are removed from the Lambda
+functions and the Twilio sender's webhook stops pointing at it. Its
+`/twilio/whatsapp` route and `twilio.mjs` can be deleted in a later
+ClashCWL clean-up, following its `AGENTS.md`.
 
 ### 5. Toasty Turtle Cafe (`miras-dev/toasty`, Apps Script)
 
+**Provider switch**
+
 - Script Property `WHATSAPP_PROVIDER=twilio|meta` (default `twilio`).
-- `meta` uses `META_WA_TOKEN`, `META_WA_PHONE_NUMBER_ID`,
-  `OWNER_TEMPLATE` (e.g. `toasty_new_submission`, 3 body variables),
-  `CONFIRMATION_TEMPLATE` (3 variables: name, date and time, guests),
-  `TEMPLATE_LANG`. Same `templateVar` cleaning. Errors stay caught, so
-  the Sheet and email keep working.
+- `meta` uses `META_WA_TOKEN`, `META_WA_PHONE_NUMBER_ID`, template names
+  in properties, `TEMPLATE_LANG`. Same `templateVar` cleaning. Errors stay
+  caught, so the Sheet and email keep working.
 - `setup()` checks the settings for the chosen provider; `testWhatsApp()`
   works for both.
-- The owner pastes the new script into Apps Script before cutover.
+
+**Owner approval for reservations** (setting `OWNER_APPROVAL=true`, off by
+default; until it's on, the café works exactly as today)
+
+What the owner told us: today the alert goes to the café owner only, and
+guests hear nothing. Most bookings are for the next 12 hours.
+
+1. A reservation comes in. As today: row in the Sheet, email, WhatsApp to
+   the owner. With approval on, the row also gets a booking id and the
+   status **Waiting**, and the owner's WhatsApp is the
+   `toasty_booking_request` template with two quick-reply buttons,
+   **Confirm** and **Decline**, whose payloads are
+   `toasty:confirm:<booking_id>` and `toasty:decline:<booking_id>`.
+   Messages and franchise enquiries keep the plain alert.
+2. The owner taps. The Hub posts `{action:"decision", booking, decision,
+   from}` to the script's web app (`doPost`), signed with a shared secret
+   (`HUB_SECRET` in Script Properties and in an n8n credential). Apps
+   Script can't read request headers, so the HMAC goes in the body with a
+   timestamp, and requests older than 10 minutes are refused.
+3. The script checks `from` is one of `OWNER_WHATSAPP_TO`, finds the row,
+   and only if it is still **Waiting**:
+   - **Confirm**: sends the guest the confirmation, sets **Confirmed**.
+   - **Decline**: sends the guest the polite "sorry", sets **Declined**.
+   It answers the Hub with the owner's line, e.g. "Done: Anna (2 guests,
+   24/12 19:00) has been told it's confirmed." A second tap, or a tap by
+   another owner number after the first, answers "Already confirmed" (or
+   declined) and sends the guest nothing.
+4. No tap: nothing happens. The row stays **Waiting** (owner's call; no
+   reminder, no auto-confirm).
+
+**What the guest gets** (owner's wording; Utility templates, since the
+guest hasn't messaged us)
+
+- First message ever to this guest's number: introduce Azolute AI first,
+  in the same message (my call: one message, not two, so the guest gets
+  one notification and we pay for one):
+  - `toasty_booking_confirmed_intro`: "Hello, this is Azolute AI, the
+    booking assistant for Toasty Turtle Cafe. Your table for {{1}} on
+    {{2}} has been confirmed by the café. See you soon!"
+  - `toasty_booking_declined_intro`: "Hello, this is Azolute AI, the
+    booking assistant for Toasty Turtle Cafe. Sorry, the café can't take
+    your booking for {{1}}. Please call {{2}} to find another time."
+- Any later message to the same number: no introduction.
+  - `toasty_booking_confirmed`: "Toasty Turtle Cafe: your table for {{1}}
+    on {{2}} has been confirmed. See you soon!"
+  - `toasty_booking_declined`: "Toasty Turtle Cafe: sorry, we can't take
+    your booking for {{1}}. Please call {{2}} to find another time."
+- Variables: {{1}} guests (confirmed) or date and time (declined), {{2}}
+  the form's "Date & Time" field as typed (confirmed) or `CAFE_PHONE`
+  (declined). The form sends date and time as one field.
+- "First time" means no earlier row in the Reservations tab for that
+  phone number has had a guest message sent. The tab gets three new
+  columns at the end: Booking ID, Status, Guest told (added to the
+  existing header row if missing).
+- If the guest replies, it lands in the Azolute inbox like any other chat.
+
 
 ### 6. Content Engine (n8n, branch `claude/kind-cannon-5bluac`)
 
@@ -267,9 +307,10 @@ Follows its `AGENTS.md`: read `docs/PLATFORM_PLAN.md` first, update
 Create in the Messaging account we end up on (keep the old ones if we
 stay on the existing account and they are still there):
 
-- ClashCWL alert: Utility, one variable, e.g. `Watch alert: {{1}}`.
 - Café owner alert `toasty_new_submission` (body in the script's header).
-- Café guest confirmation (3 variables).
+- Café owner booking request `toasty_booking_request`: the reservation
+  details plus Confirm / Decline quick-reply buttons.
+- The four café guest templates in section 5.
 - `content_review` (spec in `docs/content-engine-setup.md`).
 
 They can be submitted before cutover day, so approval isn't on the
@@ -302,29 +343,27 @@ steps in the runbook differ.
 
 Before the day (no effect on live traffic):
 
-0. **Gate:** read `TWILIO_FORWARD_URL` on ClashCWL's API function. If it
-   is set, find what's behind it and give it a route in the Hub (and a
-   provider switch if it sends) before going further. No cutover until
-   this is settled.
+0. **Check:** in Twilio, note the sender's "A message comes in" URL, and
+   ClashCWL's `TWILIO_FORWARD_URL`. ClashCWL is leaving WhatsApp, so the
+   only question is whether anything else is behind the forward URL. If
+   so, it gets a route before cutover.
 1. Meta: app, System User token, Business verification if Meta asks for it.
 2. Templates submitted and approved.
 3. Hub built and tested with Meta's free test number.
-4. ClashCWL deployed, café script pasted, inbox updated, all still on
-   `twilio`.
+4. Café script pasted and inbox updated, both still on `twilio`;
+   `OWNER_APPROVAL` off.
 
 On the day, in a quiet hour:
 
 1. Meta steps for the path found above; Hub set as the webhook.
 2. Send a test message to the number: it shows in `wa_messages`.
-3. Flip settings: ClashCWL `WHATSAPP_PROVIDER=meta` + `META_*`; café Script
-   Properties; inbox `.env`; Content Engine settings row + credential;
+3. Flip settings: café Script Properties; remove ClashCWL's `TWILIO_*`
+   settings; inbox `.env`; Content Engine settings row + credential;
    publish the Hub, Owner Replies, Render & Preview.
-4. Check each system: ClashCWL admin "Send a test message" and a STOP /
-   START from a hunter number; café `testWhatsApp`; inbox send and
+4. Check each system: café `testWhatsApp` and a test reservation; inbox send and
    receive; Content Engine "Make One Now".
 5. Unshare Twilio from the accounts; run the inbox history import.
-6. After a quiet week: remove Twilio settings, the `/twilio/whatsapp`
-   route, and close Twilio. Check that nothing uses the US number
+6. After a quiet week: close Twilio. Check that nothing uses the US number
    (+1 754…, $1.15/month) before releasing it.
 
 Rollback, until Twilio is unshared: set the providers back to `twilio`
@@ -334,14 +373,14 @@ and point the webhook back. No deploy needed.
 
 Read against the two rules, nothing breaks and life gets easier:
 
-1. **`TWILIO_FORWARD_URL` is a gate, not a cutover-day check.** Nobody
-   knows yet what's behind it. Finding out on the day could leave
-   customers without answers, so it's the first "before the day" step.
+1. **Know what's on the Twilio webhook before the day.** ClashCWL is
+   leaving WhatsApp, but whatever its forward URL points at is checked
+   first, so no one loses replies.
 2. **We hear about failures instead of finding them.** A small n8n error
    workflow emails `miras@azolute.one` (existing SMTP credential) when the
    Hub or Owner Replies fails, and when a Hub row records a routing error
-   or a send fails. ClashCWL and the café already log their errors; their
-   send results stay as they are.
+   or a send fails. The café script already logs its errors, and the
+   owner hears about a failed guest message in the reply to their tap.
 3. **The inbox mustn't flood n8n.** Polling every 5 s is about 17,000
    runs a day. The inbox server only polls the Hub while the page is open
    (a request in the last 30 s), and the inbox API workflow doesn't save
