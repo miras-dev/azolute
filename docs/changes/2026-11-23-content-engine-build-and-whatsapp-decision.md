@@ -7,7 +7,8 @@ guides it points to are the source of truth for each part.
 - **Chat 1** (23–24 Nov): built the Content Engine on n8n, then worked out
   how to move the WhatsApp number off Twilio and chose the approach.
 - **Chat 2** (24 Nov, started from chat 1): designed and built the
-  WhatsApp move. Its own docs are listed in part 3.
+  WhatsApp move. Its summary is `docs/changes/2026-11-24-whatsapp-content-engine.md`;
+  this file covers chat 1 in detail and doesn't repeat it.
 
 ## At a glance
 
@@ -179,26 +180,11 @@ working either way, because the script catches WhatsApp errors.
 
 ## 3. WhatsApp off Twilio: what chat 2 built
 
-As recorded in `docs/whatsapp-cutover-runbook.md`, "What's already built":
-
-| Piece | Where | State |
-|---|---|---|
-| WhatsApp Hub (receives, logs, routes) | n8n `IorCSvwB305dpU5g` | built, tested, not published |
-| WhatsApp Hub · Inbox API | n8n `BuatfauT1gooTQ9q` | built, tested, not published |
-| WhatsApp Hub · Alerts (emails on failure) | n8n `M8FOdndi0Jfx2Qv6` | published |
-| Owner Replies, called by the Hub | n8n `7b7LKdOUEbPPUctx` | changed, not published |
-| `wa_messages` log and `hub_settings` tables | n8n | created |
-| Café script with a Twilio/Meta switch and Confirm/Decline | `miras-dev/toasty`, branch `claude/whatsapp-meta` | pushed, not pasted into Apps Script yet |
-| Inbox app with Twilio/Hub modes and history import | `miras-dev/whatsapp-inbox`, branch `claude/whatsapp-meta` | pushed |
-
-Its documents, all in this repo:
-
-- `docs/superpowers/specs/2026-11-24-whatsapp-off-twilio-design.md`: the
-  approved design
-- `docs/superpowers/plans/2026-11-24-whatsapp-off-twilio.md`: the build plan
-- `docs/whatsapp-cutover-runbook.md`: the owner's step-by-step list
-- `docs/app-azolute-one-plan.md`: the plan for app.azolute.one, with the
-  WhatsApp inbox as feature 1
+See `docs/changes/2026-11-24-whatsapp-content-engine.md`. It covers the
+WhatsApp Hub, Inbox API and Alerts workflows on n8n, the `wa_messages`
+and `hub_settings` tables, the café script and inbox app branches, the
+review and its fixes, and the remaining small issues. Its design, plan
+and runbook are in `docs/superpowers/` and `docs/whatsapp-cutover-runbook.md`.
 
 ---
 
@@ -212,9 +198,9 @@ For the owner:
 - **Content Engine:** add the Gemini key and the Instagram token, fill in
   the two `SET_ME` ids, and publish the workflows (order in
   `docs/content-engine-setup.md`).
-- **Branches to merge:** `claude/kind-cannon-5bluac` in this repo, and
-  `claude/whatsapp-meta` in `toasty` and `whatsapp-inbox`. Nothing has
-  been merged to `main`.
+- **Branches to merge:** this repo's work is on `main`. The
+  `claude/whatsapp-meta` branches in `toasty` and `whatsapp-inbox` are
+  not merged yet.
 
 Not built yet:
 
