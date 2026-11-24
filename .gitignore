@@ -1,0 +1,5 @@
+# Private business research and reports. This repository is public and the
+# deploy workflow syncs most of it to the website bucket, so these folders
+# must never be committed.
+research_notes/
+reports/
