@@ -33,9 +33,10 @@ and phone widths (no sideways scroll).
 
 - ~~The website chat assistant~~: updated the same day (see below).
 - ~~The "What's inside" cards~~: updated the same day (see below).
-- **Still old on `ecosystem.html`:** the before/after scenes ("The phone rings
-  out", "Customers never return") still show the phone and the retention
-  engine, and the meta description says "answers your calls".
+- ~~The before/after scenes and the page description~~: updated the same day
+  (see below). Nothing on `ecosystem.html` now presents the phone or the
+  retention engine as available. The "Guests come back" proof card stays: it
+  reports a past client project, not a product on sale.
 
 ## Website chat assistant (n8n "Azolute Site Chat", `BNbSX6whgbJNrmA7`)
 
@@ -75,3 +76,17 @@ edited from Claude. Published at 15:13 UTC on 24 Nov 2026.
 - New `.card-status` style in `css/azolute.css`; `ecosystem.html` now loads
   it as `azolute.css?v=20261124-modules`. Other pages are unaffected. Checked
   at desktop, tablet and phone widths (no sideways scroll).
+
+## `ecosystem.html`, before/after scenes and description
+
+| Place | Before | Now |
+|---|---|---|
+| Meta description, Open Graph description, hero line | "answers your calls, replies on WhatsApp, fills your calendar and brings customers back" | "replies on WhatsApp, takes bookings you approve with one tap, and keeps your Instagram posting" |
+| Scene 1 | "The phone rings out: phone-only bookings become a calendar that fills itself" | "The reservation book stays empty: bookings arrive from your website and WhatsApp, ready for your one-tap OK" |
+| Scene 2 | WhatsApp agent answers at night | unchanged (built) |
+| Scene 3 | "Paperwork becomes one report with your morning coffee" (the daily report isn't built) | "Messages, bookings and posts in one place, each waiting for your tap" |
+| Scene 4 | "Customers never return: QR opt-ins and personalised offers" (retention engine) | "Your feed goes quiet: posts drafted for you every week keep guests seeing you" (Content add-on) |
+
+The scene images are unchanged; the new captions fit them (an empty paper
+book becoming a filling calendar; a busy doorway for scene 4). Checked at
+desktop, tablet and phone widths.
