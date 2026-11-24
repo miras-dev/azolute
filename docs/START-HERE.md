@@ -138,9 +138,9 @@ Notes from the 24 Nov check:
 - Site Chat and Contact Intake now allow MCP access, so every Azolute
   workflow can be read and edited from Claude. Both exports were compared and
   refreshed on 24 Nov. Contact Intake's logic already matched; only canvas
-  positions changed. Its webhook still accepts requests from any site
-  (`allowedOrigins: *`), unlike Site Chat (azolute.one only); the honeypot
-  field and email check filter spam.
+  positions changed. On 24 Nov its webhook was restricted to azolute.one and
+  www.azolute.one (it was `*`), the same as Site Chat; tested with preflight
+  checks and a honeypot POST, which took the silent-drop path (no email).
 - The Hub, Inbox API and Alerts have no git export yet.
 
 ### Other repos in this work
