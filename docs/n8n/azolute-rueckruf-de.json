@@ -1,0 +1,413 @@
+{
+  "name": "Azolute · Rückruf (DE)",
+  "nodes": [
+    {
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        384
+      ],
+      "parameters": {
+        "content": "## Azolute · Rückruf (DE)\nThe call-back form on **azolute.one/de/** posts here.\n\n1. A filled honeypot (`website`) is answered OK and dropped.\n2. Without consent, a phone, a name or an email: 400, nothing stored.\n3. Otherwise the request and the **exact consent wording and time** go into `callback_requests` (the proof that a call is allowed, UWG § 7), the browser gets OK, Miras gets an email and the sender a German acknowledgement. Mail failures never lose the stored row.\n\nUnpublished until launch: docs/de-launch-checklist.md",
+        "color": 5,
+        "width": 620,
+        "height": 300
+      }
+    },
+    {
+      "name": "Rückruf Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        96
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "azolute-rueckruf",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://azolute.one,http://localhost:8000"
+        }
+      }
+    },
+    {
+      "name": "Bot?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ String($json.body.website || '').length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "name": "Respond OK (bot, nothing stored)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}"
+      }
+    },
+    {
+      "name": "Valid With Consent?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        192
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.consent === true && String($json.body.email || '').includes('@') && String($json.body.phone || '').trim().length > 0 && String($json.body.name || '').trim().length > 0 && String($json.body.consent_text || '').trim().length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "name": "Save Request",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        96
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "oyOxvgiGgATXEcRt",
+          "cachedResultName": "callback_requests"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ String($json.body.name || '').trim().slice(0, 200) }}",
+            "venue": "={{ String($json.body.venue || '').trim().slice(0, 200) }}",
+            "phone": "={{ String($json.body.phone || '').trim().slice(0, 40) }}",
+            "email": "={{ String($json.body.email || '').trim().slice(0, 200) }}",
+            "best_time": "={{ String($json.body.best_time || '').trim().slice(0, 200) }}",
+            "message": "={{ String($json.body.message || '').trim().slice(0, 2000) }}",
+            "consent_text": "={{ String($json.body.consent_text || '').trim().slice(0, 1000) }}",
+            "consent_at": "={{ String($json.body.consent_at || '').slice(0, 40) }}",
+            "page": "={{ String($json.body.page || '').slice(0, 200) }}",
+            "submitted_at": "={{ $now.toISO() }}",
+            "status": "new"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "venue",
+              "displayName": "venue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "best_time",
+              "displayName": "best_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consent_text",
+              "displayName": "consent_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consent_at",
+              "displayName": "consent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "page",
+              "displayName": "page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "submitted_at",
+              "displayName": "submitted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        96
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}"
+      }
+    },
+    {
+      "name": "Notify Miras",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        96
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "smtp": {
+          "id": "JU7W8yNmqyToDIQZ",
+          "name": "SMTP account"
+        }
+      },
+      "parameters": {
+        "fromEmail": "Azolute Website <noreply@azolute.one>",
+        "toEmail": "miras@azolute.one",
+        "subject": "={{ 'Rückruf-Anfrage: ' + $('Save Request').item.json.venue + ' (' + $('Save Request').item.json.name + ')' }}",
+        "emailFormat": "text",
+        "text": "={{ 'New call-back request from azolute.one/de/\\n\\nName: ' + $('Save Request').item.json.name + '\\nVenue: ' + $('Save Request').item.json.venue + '\\nPhone: ' + $('Save Request').item.json.phone + '\\nEmail: ' + $('Save Request').item.json.email + '\\nBest time: ' + ($('Save Request').item.json.best_time || 'not given') + '\\n\\nMessage:\\n' + ($('Save Request').item.json.message || '(none)') + '\\n\\nConsent given at ' + $('Save Request').item.json.consent_at + ' to this text:\\n' + $('Save Request').item.json.consent_text + '\\n\\nStored in the n8n data table callback_requests (consent record). Delete the row on withdrawal or 12 months after the last contact without a contract.' }}",
+        "options": {}
+      }
+    },
+    {
+      "name": "Acknowledge In German",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1344,
+        96
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "smtp": {
+          "id": "JU7W8yNmqyToDIQZ",
+          "name": "SMTP account"
+        }
+      },
+      "parameters": {
+        "fromEmail": "Miras von Azolute <miras@azolute.one>",
+        "toEmail": "={{ $('Save Request').item.json.email }}",
+        "subject": "Ihre Rückruf-Anfrage bei Azolute",
+        "emailFormat": "text",
+        "text": "={{ 'Guten Tag ' + $('Save Request').item.json.name.slice(0, 100) + ',\\n\\nvielen Dank für Ihre Anfrage. Ich rufe Sie wie gewünscht an' + ($('Save Request').item.json.best_time ? ' (' + $('Save Request').item.json.best_time.slice(0, 100) + ')' : '') + ' und zeige Ihnen den Buchungsdesk.\\n\\nSie haben eingewilligt, dass wir Sie zu Ihrer Anfrage anrufen oder anschreiben. Sie können diese Einwilligung jederzeit widerrufen: Eine kurze Antwort auf diese E-Mail genügt.\\n\\nViele Grüße\\nMiras\\nAzolute\\nhttps://azolute.one/de/' }}",
+        "options": {}
+      }
+    },
+    {
+      "name": "Respond 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        288
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Rückruf Webhook": {
+      "main": [
+        [
+          {
+            "node": "Bot?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bot?": {
+      "main": [
+        [
+          {
+            "node": "Respond OK (bot, nothing stored)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Valid With Consent?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid With Consent?": {
+      "main": [
+        [
+          {
+            "node": "Save Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Request": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond OK": {
+      "main": [
+        [
+          {
+            "node": "Notify Miras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Miras": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge In German",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "n8nWorkflowId": "g6aCvYQvXV608TYn",
+    "dataTable": "callback_requests (oyOxvgiGgATXEcRt)",
+    "note": "Exported 2026-11-24. Unpublished until launch (docs/de-launch-checklist.md). Credentials are referenced by id only; no secrets."
+  }
+}
