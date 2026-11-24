@@ -268,23 +268,25 @@ guests hear nothing. Most bookings are for the next 12 hours.
 **What the guest gets** (owner's wording; Utility templates, since the
 guest hasn't messaged us)
 
-- First message ever to this guest's number: introduce Azolute AI first,
-  in the same message (my call: one message, not two, so the guest gets
-  one notification and we pay for one):
-  - `toasty_booking_confirmed_intro`: "Hello, this is Azolute AI, the
-    booking assistant for Toasty Turtle Cafe. Your table for {{1}} on
-    {{2}} has been confirmed by the café. See you soon!"
-  - `toasty_booking_declined_intro`: "Hello, this is Azolute AI, the
-    booking assistant for Toasty Turtle Cafe. Sorry, the café can't take
-    your booking for {{1}}. Please call {{2}} to find another time."
-- Any later message to the same number: no introduction.
+- **A guest we've never messaged gets two separate messages**, in this
+  order (owner's call):
+  1. The introduction, `toasty_intro`: "Hello, this is Azolute AI, the
+     booking assistant for Toasty Turtle Cafe. We'll send updates about
+     your booking here."
+  2. The decision (below).
+- **A returning guest** gets only the decision.
+- The decision templates:
   - `toasty_booking_confirmed`: "Toasty Turtle Cafe: your table for {{1}}
-    on {{2}} has been confirmed. See you soon!"
+    on {{2}} has been confirmed. See you soon!" ({{1}} guests, {{2}} the
+    form's "Date & Time" as typed.)
   - `toasty_booking_declined`: "Toasty Turtle Cafe: sorry, we can't take
-    your booking for {{1}}. Please call {{2}} to find another time."
-- Variables: {{1}} guests (confirmed) or date and time (declined), {{2}}
-  the form's "Date & Time" field as typed (confirmed) or `CAFE_PHONE`
-  (declined). The form sends date and time as one field.
+    your booking for {{1}}. Please call {{2}} to find another time." ({{1}}
+    the date and time, {{2}} `CAFE_PHONE`.)
+- The same rule applies to a decline (my call: the guest should know who
+  is writing either way).
+- If the introduction fails, the decision is still sent (it's the one that
+  matters); the failure is noted in the owner's reply.
+- Cost: a new guest is two template messages, a returning guest one.
 - "First time" means no earlier row in the Reservations tab for that
   phone number has had a guest message sent. The tab gets three new
   columns at the end: Booking ID, Status, Guest told (added to the
@@ -310,7 +312,7 @@ stay on the existing account and they are still there):
 - Café owner alert `toasty_new_submission` (body in the script's header).
 - Café owner booking request `toasty_booking_request`: the reservation
   details plus Confirm / Decline quick-reply buttons.
-- The four café guest templates in section 5.
+- The three café guest templates in section 5 (`toasty_intro`, `toasty_booking_confirmed`, `toasty_booking_declined`).
 - `content_review` (spec in `docs/content-engine-setup.md`).
 
 They can be submitted before cutover day, so approval isn't on the
