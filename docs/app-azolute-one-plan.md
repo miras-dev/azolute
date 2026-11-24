@@ -32,7 +32,7 @@ only needs to show and control it; **planned** = in the offer, not built yet.
 | # | Feature | Automation behind it | Status |
 |---|---|---|---|
 | F1 | **Login and roles**: Azolute admin, client owner, client staff | — | planned |
-| F2 | **Clients**: add a client, their business details, which modules and plan (Starter / Growth / Full, Content Lite / Pro) they have | — | planned |
+| F2 | **Clients**: add a client, their business details, which modules and plan (Booking Desk / Booking Desk + Phone, the content add-on, the founding-client rate) they have | — | planned |
 | F3 | **Automation settings page** (see below): edit the values the n8n automations use, per client, instead of editing n8n tables | all n8n workflows | planned (idea) |
 | F4 | **Health**: what ran, what failed, last message received, alerts (today these are emails from *WhatsApp Hub · Alerts*) | Alerts workflow, n8n executions | built (email only) |
 
@@ -43,8 +43,8 @@ only needs to show and control it; **planned** = in the offer, not built yet.
 | 1 | **WhatsApp inbox**: every message in and out, reply, photos, contact names, 24-hour window | WhatsApp Hub + Inbox API | built (laptop app); app version planned |
 | 2 | **Templates**: the approved WhatsApp templates per number and their status | Meta WhatsApp Manager | planned |
 | 3 | **WhatsApp AI agent**: edit the "approved information" it answers from, see its conversations, take over a chat | the Hub's "everything else" slot | planned |
-| 4 | **Missed-call text-back**: log of missed calls and the WhatsApp sent | — | planned |
-| 5 | **AI phone receptionist**: call log, transcripts, bookings taken | — | planned |
+| 4 | **Missed-call text-back**: log of missed calls and the WhatsApp sent | — | planned (Booking Desk; build Feb–Mar 2027) |
+| 5 | **AI phone receptionist**: call log, transcripts, bookings taken | — | planned (Desk + Phone; Q3 2027, only if three clients ask) |
 
 ### Content Engine (for Azolute and for clients)
 
@@ -52,11 +52,11 @@ only needs to show and control it; **planned** = in the offer, not built yet.
 |---|---|---|---|
 | 6 | **Drafts queue**: every post waiting, with Approve / Edit / Skip in the app as well as on WhatsApp | Plan Post, Render & Preview, Owner Replies | built (WhatsApp only) |
 | 7 | **Brand settings**: voice, audience, themes, hashtags, image style, owner's WhatsApp | `content_settings` | built (table only) |
-| 8 | **Content calendar**: the month ahead, approved in the same flow | — | planned (Lite) |
+| 8 | **Content calendar**: the month ahead, approved in the same flow | — | planned (content add-on) |
 | 9 | **Published posts and performance**: links, reach, likes, best of the week | Owner Replies (publish) | partly built |
 | 10 | **Media library**: the owner's photos and generated images | `content_media`, Media Server | built (table only) |
-| 11 | **YouTube uploads**: owner's clips with title, description, tags, thumbnail | — | planned (Lite) |
-| 12 | **AI Reels / Shorts and monthly campaigns** | — | planned (Pro) |
+| 11 | **YouTube uploads**: owner's clips with title, description, tags, thumbnail | — | planned (not in the current price card) |
+| 12 | **AI Reels / Shorts and monthly campaigns** | — | planned (content add-on with reels; reel automation December 2026) |
 
 ### Bookings and customers
 
@@ -64,18 +64,18 @@ only needs to show and control it; **planned** = in the offer, not built yet.
 |---|---|---|---|
 | 13 | **Bookings**: website bookings with Waiting / Confirmed / Declined, and Confirm / Decline in the app too | Toasty café script + Hub | built (café, Sheet) |
 | 14 | **Online booking and reminders**: calendar booking page, confirmations, reminders | Cal.com | partly built (Azolute's own) |
-| 15 | **No-show protection**: deposit / card-hold links | — | planned (Growth) |
-| 16 | **Review engine**: review requests after a visit; AI-drafted replies to approve | — | planned (Growth) |
-| 17 | **Retention engine**: QR opt-ins, offers by spend, win-back campaigns | — | planned (Full) |
-| 18 | **Contacts (light CRM)**: every message, call and booking becomes a contact with history | wa_messages, bookings | planned (Full) |
-| 19 | **Invoices and payment links** | — | planned (Full) |
+| 15 | **No-show protection**: deposit / card-hold links | — | planned (Desk + Phone) |
+| 16 | **Review engine**: review requests after a visit; AI-drafted replies to approve | — | planned (Desk + Phone; review requests to every guest from Q2 2027) |
+| 17 | **Retention engine**: QR opt-ins, offers by spend, win-back campaigns | — | planned (Full, not on sale before 2028) |
+| 18 | **Contacts (light CRM)**: every message, call and booking becomes a contact with history | wa_messages, bookings | planned (Full, not on sale before 2028) |
+| 19 | **Invoices and payment links** | — | planned (Full, not on sale before 2028) |
 
 ### Reports
 
 | # | Feature | Automation behind it | Status |
 |---|---|---|---|
-| 20 | **Owner's daily report**: configure and preview the morning WhatsApp / email (enquiries, leads, bookings, posts) | — | planned (Starter) |
-| 21 | **Monthly numbers for the quarterly review** | — | planned (Full) |
+| 20 | **Owner's daily report**: configure and preview the morning WhatsApp / email (enquiries, leads, bookings, posts) | — | planned (Booking Desk; build Feb–Mar 2027) |
+| 21 | **Monthly numbers for the quarterly review** | — | planned (Full, not on sale before 2028) |
 
 ### Running Azolute itself (admin only)
 
@@ -92,6 +92,14 @@ only needs to show and control it; **planned** = in the offer, not built yet.
 2. **Content and bookings:** 6, 7, 9, 10, 13, so the things already running can
    be seen and controlled without n8n.
 3. **Everything else**, in the order clients buy it.
+
+**Timing (decided 24 Nov 2026):** the app waits until about ten paying
+clients (2028). Until then WhatsApp stays the owner's interface, and n8n
+tables carry the settings and usage. What gets built first instead: reel
+automation (December 2026), missed-call text-back and the daily owner report
+(February–March 2027), per-client message and Meta-cost logging (Q2 2027),
+and the phone module only if three paying clients ask (Q3 2027). See
+`docs/changes/2026-11-24-strategy-and-pricing.md`.
 
 ## The automation settings page (F3)
 

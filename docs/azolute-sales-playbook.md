@@ -12,7 +12,7 @@ deliver than the customer pays.
 
 Discovery diagnoses. The proposal (sent within 48 hours, from the
 standardised framework below) is where prices live. If pressed on a call:
-"Our packages start at €149 a month; I'll send you an exact proposal
+"Our Booking Desk starts at €199 a month; I'll send you an exact proposal
 tomorrow once I understand your setup."
 
 ---
@@ -82,27 +82,56 @@ When a need does not fit a catalogue package, the quote is BUILT, never
 improvised:
 
 1. Estimate delivery hours (onboarding and monthly separately)
-2. Labour at the EXTERNAL rate of €45/hour minimum
+2. Labour at the card's change rate: €90/hour in Germany, ₹1,500/hour in
+   India, QAR 300/hour in the GCC
    (the €25/hour figure in the business plan is internal founder
    compensation, not a charge-out rate; quoting external work at internal
    cost guarantees losses)
 3. Infrastructure and API costs × 1.3 safety factor
-4. Check against minimums: no subscription below €149/month, no one-time
-   project below €490, no engagement below 60% gross margin
+4. Check against the card minimums: in Germany no subscription below
+   €199/month (the founding-client rate is the one documented exception)
+   and no project below €1,490; in India no project below ₹25,000; no
+   engagement below 60% gross margin
 5. Round to a clean price and write the deliverables and allowances on
    the order
 
-Manual work is priced by labour, always. The Content Engine prices
-(€99/€229) are only valid because production is automated with owner
+Manual work is priced by labour, always. The content add-on prices
+(€290/€390) are only valid because production is automated with owner
 approval; the moment a package includes manual filming, editing or
 design hours, it leaves the catalogue and goes through this framework.
 
 ---
 
+## Price cards and deal rules (from 24 November 2026)
+
+The price cards for Germany, India and Qatar/GCC are in
+`docs/azolute-ecosystem-offer.md`; why they changed is in
+`docs/changes/2026-11-24-strategy-and-pricing.md`.
+
+- Quote only from the cards, and make each quote valid for 14 days.
+- Change prices only on 1 January and 1 July, with written notice to
+  existing clients.
+- Give concessions in scope or free months, never in the price itself.
+- One documented exception only: the founding-client rate, in return for a
+  case study, a review and introductions.
+- Builds in India and Germany are paid 50% at the start, 30% at the preview
+  and 20% at acceptance before launch. Qatar is paid 50% on order and 50% on
+  delivery.
+- Retainers are paid monthly in advance. Code, admin access and domains are
+  handed over only after full payment.
+- Existing retainers move to the card only with written notice, never in
+  the middle of an agreed period.
+- In Germany, no cold email, WhatsApp or LinkedIn sales messages and no cold
+  calls (UWG § 7 requires consent, even between businesses). Warm calls go
+  only to people who asked to be contacted, and the consent is recorded.
+
+---
+
 ## Two catalogues, not one
 
-The Starter/Growth/Full packages are designed for appointment-based
-service businesses. E-commerce has different mechanics:
+The Booking Desk packages are designed for table-booking hospitality
+(Berlin, 2027) and other appointment-based service businesses. E-commerce
+has different mechanics:
 
 | Service businesses | E-commerce equivalent |
 |---|---|
@@ -116,10 +145,13 @@ service businesses. E-commerce has different mechanics:
 Do not force an e-commerce customer into the service catalogue; use the
 e-commerce track below.
 
-### E-COMMERCE TRACK (DRAFT — validate delivery costs before selling)
+### E-COMMERCE TRACK (PAUSED on 24 November 2026; kept for reference)
 
-Status: provisional price bands. Pilot with at most ONE e-commerce client,
-track actual hours and infrastructure, then fix the prices.
+Status: paused. Shops are sold as projects from the price cards (Germany:
+Shopify starter shop €2,900, referral only; India: ₹50,000 starter store or
+₹90,000 store; Qatar: QAR 14,000). Revisit the monthly track only if a shop
+client asks for a monthly service; then pilot with at most ONE e-commerce
+client, track actual hours and infrastructure, and fix the prices.
 
 **Commerce Starter — target €199/month (+ €690 setup)**
 - AI shopping assistant on the website and WhatsApp (product questions,
@@ -134,7 +166,7 @@ track actual hours and infrastructure, then fix the prices.
   monthly funnel report (visitors, add-to-cart, checkout, cost per
   purchase)
 
-Content Engine (Lite €99 / Pro €229) attaches to either track unchanged:
+The content add-on (€290 / €390 a month) attaches to either track unchanged:
 it is automated production and its economics do not depend on the
 business type.
 

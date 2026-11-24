@@ -11,8 +11,8 @@ terms, is kept outside the repository.
 
 **Status:** these are the research's recommendations, recorded as the working
 plan. Nothing here changes a live client's price until that client is told in
-writing. Where an older doc disagrees, this doc wins (see "Docs now out of
-date" below).
+writing. Where any doc disagrees, this doc wins. The older docs were
+updated to match on the same day (see "Older docs updated" below).
 
 ## In one paragraph
 
@@ -180,18 +180,25 @@ clients per month × average fee ÷ monthly churn**. A second module per client
 The full research report (Markdown and PDF) with client-specific deal terms,
 and the research notes behind it.
 
-## Docs now out of date
+## Older docs updated to the new prices (24 Nov 2026)
 
-These still show the old offer. Treat this doc as the source until they are
-updated:
+- `docs/azolute-ecosystem-offer.md` (now v2): the new packages, add-ons and
+  project prices, the India and Qatar/GCC cards, unit economics, terms,
+  sales motion and phase plan
+- `docs/azolute-business-plan.md`: section 1 prices and the first-10-client
+  financials redone with the new prices (founding client + 4 Booking Desk +
+  4 Booking Desk with content + 1 with phone and content: €3,930 MRR, €9,410
+  setup revenue, €1,870/month surplus at the carried-over €25/hour founder
+  rate), the new pricing policy and phases
+- `docs/azolute-sales-playbook.md`: the €199 opening line, the change rates
+  (€90 / ₹1,500 / QAR 300 an hour) and minimums, a new "Price cards and deal
+  rules" section, and the e-commerce track marked paused
+- `docs/app-azolute-one-plan.md`: plan names and the timing note (the
+  portal waits until about ten clients)
 
-- `docs/azolute-ecosystem-offer.md`: tiers, prices, the Content Engine prices
-- `docs/azolute-business-plan.md`: section 1 prices, the 10-client financials
-  and the post-10-client price rise
-- `docs/azolute-sales-playbook.md`: the €45/hour floor and the e-commerce track
-- `docs/app-azolute-one-plan.md`: plan names (Starter / Growth / Full,
-  Content Lite / Pro) and phase order; the portal now waits until about ten
-  clients
+**Still showing the old prices:** the public website's plans page
+(`ecosystem.html`: €149 / €299 / €499). Changing it goes live on the next
+push to `main`, so it is left for a separate decision.
 
 ## Still to do
 
