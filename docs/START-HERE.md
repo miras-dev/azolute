@@ -1,9 +1,9 @@
 # Start here: where Azolute stands (24 November 2026)
 
-Read this first in any new chat. It joins the two streams of work from 23–24
-November 2026, the **market research and strategy for 2026–2028** and the
-**n8n automations** (Content Engine and the WhatsApp move off Twilio), into one
-picture, and points to the detailed docs. Where this file and a detailed doc
+Read this first in any new chat. It joins the work from 23–24 November 2026,
+the **market research and strategy for 2026–2028**, the **n8n automations**
+(Content Engine and the WhatsApp move off Twilio) and the **website update to
+the new prices**, into one picture, and points to the detailed docs. Where this file and a detailed doc
 disagree, the detailed doc's newer date wins; update this file when that
 happens.
 
@@ -20,7 +20,9 @@ WhatsApp number is ready to move from Twilio to Meta's Cloud API through a new
 **WhatsApp Hub** on n8n: everything is built and tested, but nothing is
 switched on until Miras does the runbook steps. The next build is the
 **app.azolute.one** phase 1 (login, clients, WhatsApp inbox on AWS, health,
-settings), whose design is drafted and waiting for approval.
+settings), whose design is drafted and waiting for approval. The website
+(`ecosystem.html`) and its chat assistant were moved to the new prices on
+24 Nov and now present only built features as available.
 
 ## The plan (research, 2026–2028)
 
@@ -55,11 +57,52 @@ The private edition, with client-specific deal terms, is kept outside git
   message/Meta-cost log and review requests; Q3 2027 phone module on demand;
   2028 admin/client portal and retention engine.
 
-Docs already updated to these prices: `docs/azolute-ecosystem-offer.md` (v2),
-`docs/azolute-business-plan.md`, `docs/azolute-sales-playbook.md`,
-`docs/app-azolute-one-plan.md`, and the public plans page `ecosystem.html`
-(24 Nov), and the website chat assistant (n8n "Azolute Site Chat", same day).
-See `docs/changes/2026-11-24-website-pricing.md`.
+Docs updated to these prices: `docs/azolute-ecosystem-offer.md` (v2),
+`docs/azolute-business-plan.md`, `docs/azolute-sales-playbook.md` and
+`docs/app-azolute-one-plan.md`. The website is below.
+
+## The website (azolute.one), as of 24 Nov 2026
+
+Detail: `docs/changes/2026-11-24-website-pricing.md`. All live (deploys
+succeeded).
+
+**The rule now:** the site and the chat assistant show only built features as
+available. Planned ones carry a date label and are never offered as on sale.
+
+`ecosystem.html`:
+
+- **Pricing:** three cards: Booking Desk €199/mo + €990 setup (featured);
+  Booking Desk + Phone €349/mo + €1,490 marked "Planned for the second half of
+  2027" with a "Register interest" button; Content add-on €290/mo or €390 with
+  2 AI reels, no setup fee. Note under the cards: net of VAT, three-month
+  minimum then monthly, 15% off a year paid ahead, Meta fees paid directly,
+  +50% per extra location, a separate local-currency list for India and the
+  Gulf. FAQ answers match. The old Starter / Growth / Full plans (€149 / €299 /
+  €499) and "cancel anytime" are gone.
+- **"What's inside" cards:** WhatsApp AI Agent, Bookings You Approve and
+  Instagram Content as available; Missed-Call Text-Back and Owner's Daily
+  Report labelled "From March 2027"; AI Phone Receptionist labelled "Planned
+  for 2027". The Retention Engine card was removed. The labels use a new
+  `.card-status` style; `ecosystem.html` loads `css/azolute.css?v=20261124-modules`
+  (bump the `?v=` whenever that file changes, because assets are cached for a
+  year).
+- **Before/after scenes and description:** the meta, Open Graph and hero lines
+  now say "replies on WhatsApp, takes bookings you approve with one tap, and
+  keeps your Instagram posting". The scenes cover bookings, the WhatsApp agent,
+  the one-tap approvals and Instagram posting; no phone, daily report or
+  retention engine.
+- **Deliberately not on the page:** "EU hosting" (n8n is still on the
+  Hostinger VPS), the founding-client rate, and the INR/QAR prices.
+
+**Website chat assistant** (n8n "Azolute Site Chat"): MCP access is on. Its
+instructions carry the same card and terms, call the phone and retention
+engine planned, and forbid discounts. Tested and published on 24 Nov; the repo
+copy `docs/n8n/azolute-site-chat.json` matches the live workflow.
+
+**When a planned feature ships**, update all three places together: the
+`ecosystem.html` cards (remove the label) and pricing card, the Site Chat
+instructions (then refresh its export), and `docs/azolute-ecosystem-offer.md`.
+Add "EU hosting" to the Booking Desk card once n8n has moved to an EU server.
 
 ## The automations (n8n)
 
@@ -144,10 +187,13 @@ Notes from the 24 Nov check:
 4. German sales kit: one-page booking-desk site in German, AVV with
    sub-processor list, AI disclosure text, German price card.
 5. Optional: export the Hub, Inbox API and Alerts to `docs/n8n/`.
+6. After the EU server move, add "EU hosting" to the website's Booking Desk
+   card and the Site Chat facts.
 
 **Q1 2027:** German business set-up (Gewerbe, ELSTER, VAT choice, insurance,
 Impressum); founding-client agreement and first euro invoice on 1 February;
-missed-call text-back and daily report; case study; BNI, Google Business
+missed-call text-back and daily report (then remove their "From March 2027"
+labels on the website and update the Site Chat); case study; BNI, Google Business
 Profile, letters, LinkedIn; 90-day review in early April.
 
 ## How to work in this repo
@@ -170,5 +216,5 @@ merged into `main` (the new prices in the offer, business plan, playbook and
 app plan; the phase 1 design answers). The remaining branches only hold older
 copies of files that `main` already has in newer form, or the 9 Nov plugin
 experiment (`claude/adoring-pasteur-ufbafo`), whose last commit removed the
-plugin config again. Nothing on them
-needs merging.
+plugin config again. Nothing on them needs merging. The website changes later
+that day were made on `claude/loving-mccarthy-r13c5v` and pushed to `main`.
