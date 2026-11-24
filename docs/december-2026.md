@@ -29,7 +29,7 @@ Owner: **M** = Miras (needs your accounts, a signature or a live call),
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 8 | One-page Booking Desk site in German on azolute.one | C (short design first) | to do |
+| 8 | One-page Booking Desk site in German on azolute.one | C, then M to launch | **built 24 Nov**, off the live site until the Impressum is complete (late Jan): `docs/de-launch-checklist.md` |
 | 9 | Data processing agreement (AVV) with technical measures and a sub-processor list; a German lawyer checks it | M+C | to do |
 | 10 | AI disclosure text for the guest messages and the site | C | to do |
 | 11 | German price card (from the market research) as a one-page PDF | C | to do |
