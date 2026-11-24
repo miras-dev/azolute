@@ -32,10 +32,10 @@ and phone widths (no sideways scroll).
 ## Still showing old prices or old promises
 
 - ~~The website chat assistant~~: updated the same day (see below).
-- **Elsewhere on `ecosystem.html`**: the "What's inside" cards and the
-  before/after scenes still present the AI phone receptionist and the
-  retention engine as current modules, and the meta description says
-  "answers your calls". These are not prices, so they were not changed.
+- ~~The "What's inside" cards~~: updated the same day (see below).
+- **Still old on `ecosystem.html`:** the before/after scenes ("The phone rings
+  out", "Customers never return") still show the phone and the retention
+  engine, and the meta description says "answers your calls".
 
 ## Website chat assistant (n8n "Azolute Site Chat", `BNbSX6whgbJNrmA7`)
 
@@ -60,3 +60,18 @@ edited from Claude. Published at 15:13 UTC on 24 Nov 2026.
   workflow. The old copy was also behind on two other points the live
   workflow already had: requests accepted only from azolute.one (the copy
   allowed any site) and the Claude Haiku 5.5 model (the copy said 4.5).
+
+## `ecosystem.html`, "What's inside" cards
+
+- **Before:** "Six modules, one subscription", led by a wide AI Phone
+  Receptionist card, with Bookings & Reminders and a Retention Engine card,
+  all presented as available.
+- **Now:** "Start with the Booking Desk today. Each new module joins it as
+  it's built." Available modules first: WhatsApp AI Agent (wide), Bookings You
+  Approve (one-tap confirm or decline), Instagram Content. Then, with a small
+  status label: Missed-Call Text-Back and Owner's Daily Report ("From March
+  2027"), AI Phone Receptionist ("Planned for 2027"). The Retention Engine
+  card is removed (not on sale); "reminders" are no longer promised.
+- New `.card-status` style in `css/azolute.css`; `ecosystem.html` now loads
+  it as `azolute.css?v=20261124-modules`. Other pages are unaffected. Checked
+  at desktop, tablet and phone widths (no sideways scroll).

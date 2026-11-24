@@ -530,6 +530,19 @@ a.card:focus-visible {
 
 .card-icon svg { width: 22px; height: 22px; }
 
+.card-status {
+    position: absolute;
+    top: 1.8rem;
+    right: 1.6rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-soft);
+    white-space: nowrap;
+}
+
 .card-link {
     display: inline-flex;
     align-items: center;
