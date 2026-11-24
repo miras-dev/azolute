@@ -148,19 +148,32 @@ is echoed; if not, `source` stays empty for those rows.)
 
 **Routing** (for each `in` message, in this order):
 
-1. **Content Engine**: if the sender is a client's `owner_whatsapp` in
-   `content_settings` (matched on the business `phone_number_id`), and
-   the message is a button reply `approve:/edit:/skip:<post_id>`, or any
-   text while one of that client's posts is `awaiting_edit`, or a photo:
-   call Owner Replies as a sub-workflow with the normalised message.
-2. **ClashCWL**: if the text is one word from STOP / PAUSE / OFF / START /
-   RESUME / ON / STATUS (case and punctuation ignored): POST it to
-   ClashCWL's new inbound endpoint (below). If ClashCWL answers with a
-   reply, the Hub sends it to the hunter and logs it (`source=hub`).
-   ClashCWL itself still ignores numbers that aren't on its alert list,
-   and only these words are ever sent there.
-3. **Everything else**: stays in the log for the inbox. This is the slot
+1. **Content Engine actions**: if the sender is a client's
+   `owner_whatsapp` in `content_settings` (matched on the business
+   `phone_number_id`), and the message is a button reply
+   `approve:/edit:/skip:<post_id>`, or any text while one of that
+   client's posts is `awaiting_edit`, or a photo: call Owner Replies as a
+   sub-workflow with the normalised message.
+2. **ClashCWL** (Azolute's own number only, `AZOLUTE_PHONE_NUMBER_ID`):
+   if the text is one word from STOP / PAUSE / OFF / START / RESUME / ON /
+   STATUS (case and punctuation ignored): POST it to ClashCWL's new
+   inbound endpoint (below). If ClashCWL answers with a reply, the Hub
+   sends it to the hunter and logs it (`source=hub`). ClashCWL itself
+   still ignores numbers that aren't on its alert list, and only these
+   words are ever sent there.
+3. **The owner's other messages**: still go to Owner Replies, which
+   answers with its "how it works" note, as it does today. (My call:
+   keeps today's behaviour; the owner's number is their personal one and
+   only talks to the business number for content.)
+4. **Everything else**: stays in the log for the inbox. This is the slot
    for the WhatsApp AI agent later.
+
+**Other businesses' numbers** (my call): when a Content Engine client's
+number is later added to the same Meta app, its traffic reaches the same
+Hub. Only rules 1 and 3 apply to it; it never goes to ClashCWL, and the
+inbox API only returns rows for `AZOLUTE_PHONE_NUMBER_ID`. Their chats
+stay in the log, tagged with their `phone_number_id`, for their own
+inbox or agent later.
 
 Routing failures (sub-workflow error, ClashCWL down) are written to the
 row's `error`; the message is already logged, so nothing is lost.
@@ -295,23 +308,30 @@ Before the day (no effect on live traffic):
 
 On the day, in a quiet hour:
 
-1. Check `TWILIO_FORWARD_URL` on the ClashCWL API function: if it points
-   somewhere, that system also needs a place in the Hub's routing.
-2. Meta steps for the path found above; Hub set as the webhook.
-3. Send a test message to the number: it shows in `wa_messages`.
-4. Flip settings: ClashCWL `WHATSAPP_PROVIDER=meta` + `META_*`; café Script
+1. Meta steps for the path found above; Hub set as the webhook.
+2. Send a test message to the number: it shows in `wa_messages`.
+3. Flip settings: ClashCWL `WHATSAPP_PROVIDER=meta` + `META_*`; café Script
    Properties; inbox `.env`; Content Engine settings row + credential;
    publish the Hub, Owner Replies, Render & Preview.
-5. Check each system: ClashCWL admin "Send a test message" and a STOP /
+4. Check each system: ClashCWL admin "Send a test message" and a STOP /
    START from a hunter number; café `testWhatsApp`; inbox send and
    receive; Content Engine "Make One Now".
-6. Unshare Twilio from the accounts; run the inbox history import.
-7. After a quiet week: remove Twilio settings, the `/twilio/whatsapp`
+5. Unshare Twilio from the accounts; run the inbox history import.
+6. After a quiet week: remove Twilio settings, the `/twilio/whatsapp`
    route, and close Twilio. Check that nothing uses the US number
    (+1 754…, $1.15/month) before releasing it.
 
 Rollback, until Twilio is unshared: set the providers back to `twilio`
 and point the webhook back. No deploy needed.
+
+## Open question (owner)
+
+- **What is `TWILIO_FORWARD_URL` set to** on ClashCWL's API function
+  today? ClashCWL forwards every message that isn't STOP/START to it, and
+  whatever it answers goes back to the customer. If it's set, a live
+  system (bookings or an auto-reply) is behind it, and it needs its own
+  branch in the Hub and maybe its own provider switch, built before
+  cutover day.
 
 ## What's left to the builder
 
