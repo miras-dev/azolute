@@ -1,6 +1,8 @@
 # WhatsApp off Twilio: design
 
-Date: 2026-11-24. Status: draft for approval.
+Date: 2026-11-24. Status: **approved** (owner asked for a cofounder review
+and approval; the review's changes are in "Cofounder review" below).
+Owner's two rules: **nothing breaks**, and it makes our lives easier.
 
 ## Why
 
@@ -300,6 +302,10 @@ steps in the runbook differ.
 
 Before the day (no effect on live traffic):
 
+0. **Gate:** read `TWILIO_FORWARD_URL` on ClashCWL's API function. If it
+   is set, find what's behind it and give it a route in the Hub (and a
+   provider switch if it sends) before going further. No cutover until
+   this is settled.
 1. Meta: app, System User token, Business verification if Meta asks for it.
 2. Templates submitted and approved.
 3. Hub built and tested with Meta's free test number.
@@ -324,14 +330,25 @@ On the day, in a quiet hour:
 Rollback, until Twilio is unshared: set the providers back to `twilio`
 and point the webhook back. No deploy needed.
 
-## Open question (owner)
+## Cofounder review (changes made on approval)
 
-- **What is `TWILIO_FORWARD_URL` set to** on ClashCWL's API function
-  today? ClashCWL forwards every message that isn't STOP/START to it, and
-  whatever it answers goes back to the customer. If it's set, a live
-  system (bookings or an auto-reply) is behind it, and it needs its own
-  branch in the Hub and maybe its own provider switch, built before
-  cutover day.
+Read against the two rules, nothing breaks and life gets easier:
+
+1. **`TWILIO_FORWARD_URL` is a gate, not a cutover-day check.** Nobody
+   knows yet what's behind it. Finding out on the day could leave
+   customers without answers, so it's the first "before the day" step.
+2. **We hear about failures instead of finding them.** A small n8n error
+   workflow emails `miras@azolute.one` (existing SMTP credential) when the
+   Hub or Owner Replies fails, and when a Hub row records a routing error
+   or a send fails. ClashCWL and the café already log their errors; their
+   send results stay as they are.
+3. **The inbox mustn't flood n8n.** Polling every 5 s is about 17,000
+   runs a day. The inbox server only polls the Hub while the page is open
+   (a request in the last 30 s), and the inbox API workflow doesn't save
+   successful executions.
+4. **One page for cutover day.** The runbook is a single checklist, with
+   the exact value to type at each step and the undo for each step next
+   to it, so cutover can be done calmly and stopped at any point.
 
 ## What's left to the builder
 
