@@ -57,9 +57,10 @@ The private edition, with client-specific deal terms, is kept outside git
 
 Docs already updated to these prices: `docs/azolute-ecosystem-offer.md` (v2),
 `docs/azolute-business-plan.md`, `docs/azolute-sales-playbook.md`,
-`docs/app-azolute-one-plan.md`. **Not yet updated:** the public website's
-plans page `ecosystem.html` still shows €149 / €299 / €499. A push to `main`
-deploys the site, so changing it is a separate decision.
+`docs/app-azolute-one-plan.md`, and the public plans page `ecosystem.html`
+(24 Nov). **Not yet updated:** the website chat assistant (n8n "Azolute Site
+Chat") still tells visitors "from EUR 149 a month, month to month, cancel
+anytime"; see `docs/changes/2026-11-24-website-pricing.md`.
 
 ## The automations (n8n)
 
@@ -131,7 +132,8 @@ Notes from the 24 Nov check:
 3. Decide who owns the café's WhatsApp sending (the research says each client
    owns its own account) before the café's paid plan starts.
 4. Approve or change the app.azolute.one phase 1 design.
-5. Decide when to update `ecosystem.html` to the new prices.
+5. Update the Site Chat assistant's prices in n8n (or allow MCP access on that
+   workflow so Claude can do it).
 6. Business set-up: Udyam registration; shortlist a Steuerberater and get IT
    liability quotes.
 

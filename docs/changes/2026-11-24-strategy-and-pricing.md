@@ -196,9 +196,11 @@ and the research notes behind it.
 - `docs/app-azolute-one-plan.md`: plan names and the timing note (the
   portal waits until about ten clients)
 
-**Still showing the old prices:** the public website's plans page
-(`ecosystem.html`: €149 / €299 / €499). Changing it goes live on the next
-push to `main`, so it is left for a separate decision.
+**Website updated the same day:** the public plans page (`ecosystem.html`)
+now shows the Booking Desk (€199 + €990), Booking Desk + Phone (€349 +
+€1,490, marked as planned for the second half of 2027) and the Content add-on
+(€290 / €390), with the 3-month minimum, VAT note and the separate India/Gulf
+price list. See `docs/changes/2026-11-24-website-pricing.md`.
 
 ## Still to do
 
