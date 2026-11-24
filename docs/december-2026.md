@@ -24,7 +24,8 @@ Owner: **M** = Miras (needs your accounts, a signature or a live call),
 |---|---|---|---|
 | 4 | WhatsApp cutover off Twilio (`docs/whatsapp-cutover-runbook.md`, Parts A and B) | M (C helps on the n8n steps) | to do |
 | 5 | Gemini check: the only Gemini call is the Content Engine's image step; text is Claude everywhere, so Google's price rises don't apply. Image model switched from `gemini-2.5-flash-image` (shuts down 15 Mar 2027) to `gemini-3.1-flash-lite-image` in n8n and the docs. | C | **done 24 Nov** (test with the first real picture once the Gemini credential is set) |
-| 6 | Reel automation in the Content Engine (Veo Fast or Lite, 8–12 s generated, the rest assembled) | C (design first) | to do |
+| 5b | **Content Engine test run on Azolute's Instagram**: daily posts with WhatsApp approval on Meta's test number, 3–4 days before 1 Dec; then decide on reels and clients | M (setup, `docs/your-steps.md` section 0), then C | Miras's setup by 25/26 Nov |
+| 6 | Reel automation in the Content Engine (Veo Fast or Lite, 8–12 s generated, the rest assembled) | C (design first) | after the test run (5b) |
 | 7 | Move n8n and its data to an EU server (Hostinger VPS in an EU location), before more German clients join | M+C | to do |
 
 ## German sales kit
