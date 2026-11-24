@@ -58,9 +58,8 @@ The private edition, with client-specific deal terms, is kept outside git
 Docs already updated to these prices: `docs/azolute-ecosystem-offer.md` (v2),
 `docs/azolute-business-plan.md`, `docs/azolute-sales-playbook.md`,
 `docs/app-azolute-one-plan.md`, and the public plans page `ecosystem.html`
-(24 Nov). **Not yet updated:** the website chat assistant (n8n "Azolute Site
-Chat") still tells visitors "from EUR 149 a month, month to month, cancel
-anytime"; see `docs/changes/2026-11-24-website-pricing.md`.
+(24 Nov), and the website chat assistant (n8n "Azolute Site Chat", same day).
+See `docs/changes/2026-11-24-website-pricing.md`.
 
 ## The automations (n8n)
 
@@ -80,7 +79,7 @@ State checked live on 24 Nov 2026:
 | Content Engine · Plan Post | `dJQEkHIlElhTMr14` | no (Mon/Wed/Fri 10:00 when on) | `docs/n8n/content-engine-plan-post.json` |
 | Content Engine · Render & Preview | `7MMg2MhNJJQfXw3A` | no (sub-workflow) | `docs/n8n/content-engine-render-preview.json` |
 | Content Engine · Media Server | `OB4FHohps9OJxdh5` | **yes** | `docs/n8n/content-engine-media-server.json` |
-| Azolute Site Chat | `BNbSX6whgbJNrmA7` | **yes** | `docs/n8n/azolute-site-chat.json` (see note) |
+| Azolute Site Chat | `BNbSX6whgbJNrmA7` | **yes** | `docs/n8n/azolute-site-chat.json` (matches live, 24 Nov) |
 | Azolute Contact Intake | `FK6950GDFlPL3Ur8` | **yes** | `docs/n8n/azolute-contact-intake.json` |
 
 Data tables: `wa_messages` (`Cql2asOYThN8DQAY`, the message log; Meta keeps
@@ -93,9 +92,8 @@ Notes from the 24 Nov check:
 - The Content Engine exports match the latest saved n8n versions. Owner
   Replies also has the Alerts workflow as its error workflow; that setting was
   added to its export.
-- Site Chat and Contact Intake don't allow MCP access, so they couldn't be
-  compared. Site Chat was edited in n8n (9 Nov, 23:08 UTC) after its export
-  was last committed (9 Nov, 09:32 UTC); the export may be behind.
+- Contact Intake doesn't allow MCP access, so it couldn't be compared with
+  its export. Site Chat now allows it, and its export was refreshed on 24 Nov.
 - The Hub, Inbox API and Alerts have no git export yet.
 
 ### Other repos in this work
@@ -132,8 +130,8 @@ Notes from the 24 Nov check:
 3. Decide who owns the café's WhatsApp sending (the research says each client
    owns its own account) before the café's paid plan starts.
 4. Approve or change the app.azolute.one phase 1 design.
-5. Update the Site Chat assistant's prices in n8n (or allow MCP access on that
-   workflow so Claude can do it).
+5. Optional: allow MCP access on Contact Intake (`FK6950GDFlPL3Ur8`) so its
+   export can be checked.
 6. Business set-up: Udyam registration; shortlist a Steuerberater and get IT
    liability quotes.
 
@@ -145,8 +143,7 @@ Notes from the 24 Nov check:
 3. Plan the move of n8n and client data to an EU server.
 4. German sales kit: one-page booking-desk site in German, AVV with
    sub-processor list, AI disclosure text, German price card.
-5. Optional: export the Hub, Inbox API and Alerts to `docs/n8n/`; refresh the
-   Site Chat export.
+5. Optional: export the Hub, Inbox API and Alerts to `docs/n8n/`.
 
 **Q1 2027:** German business set-up (Gewerbe, ELSTER, VAT choice, insurance,
 Impressum); founding-client agreement and first euro invoice on 1 February;

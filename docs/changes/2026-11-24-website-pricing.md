@@ -31,12 +31,32 @@ and phone widths (no sideways scroll).
 
 ## Still showing old prices or old promises
 
-- **The website chat assistant** (n8n "Azolute Site Chat", `BNbSX6whgbJNrmA7`)
-  tells visitors "subscriptions start from EUR 149 per month … Month to month,
-  cancel anytime". Its system message needs the new card. The workflow does
-  not allow MCP access, so it has to be edited in n8n, or MCP access switched
-  on so Claude can do it.
+- ~~The website chat assistant~~: updated the same day (see below).
 - **Elsewhere on `ecosystem.html`**: the "What's inside" cards and the
   before/after scenes still present the AI phone receptionist and the
   retention engine as current modules, and the meta description says
   "answers your calls". These are not prices, so they were not changed.
+
+## Website chat assistant (n8n "Azolute Site Chat", `BNbSX6whgbJNrmA7`)
+
+MCP access was switched on for this workflow, so it could be checked and
+edited from Claude. Published at 15:13 UTC on 24 Nov 2026.
+
+- **Before:** "subscriptions start from EUR 149 per month … Month to month,
+  cancel anytime", and the phone receptionist and retention engine described
+  as current modules.
+- **Now:** the same card as `ecosystem.html`: Booking Desk EUR 199 + 990
+  (missed-call text-back and daily report from March 2027), Booking Desk +
+  Phone EUR 349 + 1,490 planned for the second half of 2027, Content add-on
+  EUR 290 / 390, net of VAT, 3-month minimum, Meta fees paid directly, +50%
+  per extra location, India/Gulf prices via the contact page. The retention
+  engine is "planned, not on sale". Two new rules: never describe a planned
+  feature as available, never offer discounts or negotiate prices.
+- **Tested** before publishing: asked about price, cancelling and the phone
+  (correct prices, 3-month minimum, phone marked as planned), and asked for
+  the Booking Desk at EUR 149 (refused politely, retention engine marked as
+  not on sale).
+- **Repo copy** `docs/n8n/azolute-site-chat.json` now matches the live
+  workflow. The old copy was also behind on two other points the live
+  workflow already had: requests accepted only from azolute.one (the copy
+  allowed any site) and the Claude Haiku 5.5 model (the copy said 4.5).
