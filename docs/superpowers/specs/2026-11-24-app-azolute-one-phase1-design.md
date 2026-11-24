@@ -1,6 +1,7 @@
 # app.azolute.one, phase 1: design
 
-Date: 2026-11-24. Status: draft for approval.
+Date: 2026-11-24. Status: draft for approval (builder check done; Miras's
+answers added).
 Parent plan: `docs/app-azolute-one-plan.md` (features F1–F4 and 1).
 
 ## Why
@@ -22,7 +23,8 @@ Goals (phase 1)
   number and Content Engine row belong to them.
 - **WhatsApp inbox (1):** the same experience as the `whatsapp-inbox` laptop
   app (chat list, unread counts, open chat, reply, photos, contact names,
-  24-hour window, sound and desktop alerts), in the browser, from anywhere.
+  24-hour window, sound and desktop alerts), in the browser, from anywhere,
+  phone screens included.
 - **Messages on AWS:** every message and status the Hub logs is also stored in
   an AWS database, with the history copied over once.
 - **Health (F4):** last message received, recent errors on messages, recent
@@ -34,6 +36,9 @@ Goals (phase 1)
 Non-goals (later phases)
 
 - Client logins, invitations, roles beyond "Miras".
+- Alerts while the app is closed (web push to the phone). In phase 1 alerts
+  work while the app is open, as in the laptop app. (Miras, 2026-11-24.)
+- An inbox for any number other than Azolute's (see Inbox).
 - Template sending, broadcasts, the AI agent, bookings, content screens,
   reports, billing (plan features 2–25).
 - Editing the café's Script Properties (they live in Google Apps Script).
@@ -59,6 +64,16 @@ Anti-goals (a failure even if it works)
   `BuatfauT1gooTQ9q`, the Alerts workflow `M8FOdndi0Jfx2Qv6`.
 - The Meta token stays in n8n (one place to rotate). The app never holds it.
 - Costs should stay in AWS's free or near-free range for one user.
+- **AWS account and region (Miras, 2026-11-24):** the same AWS account as the
+  website and ClashCWL; everything in **Frankfurt (`eu-central-1`)**, so EU
+  guests' chats stay in the EU (the café's guests are +49). CloudFront needs
+  its certificate in `us-east-1`, so that one piece is a small second stack
+  (builder's call, see below).
+- **Retention (Miras, 2026-11-24):** chats are kept until deleted. It must be
+  possible to delete one contact's chats, or a whole client's, on request
+  (phase 1: an admin action in the app or a script in the repo, builder's
+  call). Point-in-time backups are on (35 days), so a deleted chat is fully
+  gone from backups after 35 days; the runbook says so.
 
 ## Approaches
 
@@ -82,8 +97,10 @@ Miras handed the how to Claude ("go with your picks"); these are Claude's calls.
 - New private repo **`miras-dev/azolute-app`** (Miras creates it empty; the
   public website repo would publish app code to the website bucket).
 - `web/`: React + Vite front end. `api/`: Lambda handlers (Node 22, ESM).
-  `infra/template.yaml`: one AWS SAM template for everything (S3 bucket,
-  CloudFront, certificate, API, Lambdas, DynamoDB, Cognito).
+  `infra/template.yaml`: one AWS SAM template in `eu-central-1` for
+  everything (S3 buckets, CloudFront, API, Lambdas, DynamoDB, Cognito), plus
+  a small `us-east-1` stack for the CloudFront certificate only (my call:
+  CloudFront only accepts certificates from `us-east-1`).
 - GitHub Actions deploys on push to `main` with an AWS role (OIDC, no stored
   AWS keys): `sam deploy`, then `vite build` and sync to the app bucket.
 - Domain: `app.azolute.one` with an ACM certificate; Miras adds the DNS
@@ -99,7 +116,14 @@ Miras handed the how to Claude ("go with your picks"); these are Claude's calls.
 ### Data (DynamoDB, one table `azolute-app`, on-demand)
 
 Every item carries `client` (phase 1: `azolute`, and any Content Engine
-client). Access patterns the keys must serve:
+client). **`client` is an attribute of the conversation, not part of the
+message keys** (my call, from the builder check): messages are keyed by
+business number and contact. A new conversation takes the client that owns
+the number, and a conversation can be moved to another client later by
+changing one item, without rewriting its messages. Reason: café guests write
+to Azolute's number (the café's messages come from the Azolute AI number),
+so their chats are stored as `azolute` today but belong in Toasty's portal
+later. Access patterns the keys must serve:
 
 - **Messages by conversation:** all messages of one contact on one number,
   in time order.
@@ -110,6 +134,17 @@ client). Access patterns the keys must serve:
 - **Message by id (wamid):** to merge status updates and ignore repeats.
 - Clients, settings-change log, alerts, contact names: small item types in the
   same table.
+- **Delete a contact's chats, or all of a client's**, for deletion requests.
+
+### Photos and files (my call, from the builder check)
+
+Meta deletes media after 7 days, so photos are **copied into an S3 bucket**
+(private, encrypted, Frankfurt) when their message is ingested: the app API
+fetches the file once through the Hub's `wa-inbox/media` and stores it under
+the message. The catch-up job retries any message whose file is still
+missing, while Meta still has it. The inbox shows photos from S3 through the
+app API (short-lived signed links, behind the login). Deleting a contact's
+chats deletes their files too.
 
 The exact keys and indexes are the builder's call; the plan must write them
 down.
@@ -129,6 +164,12 @@ down.
 - **Catch-up:** a scheduled Lambda (every 15 min) reads the Hub's
   `wa-inbox/messages?since=` and upserts anything the app missed (app down,
   ingest refused). This also does the one-time history copy on its first run.
+  The Inbox API only returns Azolute's number, so catch-up covers that number;
+  rows for any other number arrive only through the live copy (none exist
+  yet).
+- **Other numbers:** ingest stores every number's rows, tagged with their
+  `phone_number_id`, for their own inbox later (my call; matches the Hub's
+  log).
 - **Alerts:** the Alerts workflow also posts each alert to `/ingest` so Health
   can show them.
 
@@ -136,6 +177,11 @@ down.
 
 - Same layout and look as the `whatsapp-inbox` app: its `public/style.css` and
   page structure are reused, rebuilt as React components.
+- **Works on a phone:** on a narrow screen the chat list and the open chat
+  are two screens (list, then chat, with a back button) instead of side by
+  side.
+- **Azolute's number only** in phase 1, like the Inbox API and the Hub's send
+  endpoint (my call, from the builder check).
 - Reads from the app API (conversations, thread, changes since). Polls every
   5 s while the tab is visible.
 - **Sending:** the app API calls the Hub's `POST /webhook/wa-inbox/send` with
@@ -175,11 +221,21 @@ down.
 
 ## Cutover and rollout
 
-1. Miras creates the repo, the AWS role, and the DNS records (runbook in the
+The app does not wait for the WhatsApp cutover (runbook Parts A and B), and
+the cutover does not wait for the app. **The Hub is not changed until the
+cutover is done and stable** (my call, from the builder check: the Hub is
+built and tested for cutover day, and changing it just before would break
+the owner's "nothing breaks" rule).
+
+1. Build and test the app with sample data, and against Meta's test number
+   once the Hub is running on it.
+2. Miras creates the repo, the AWS role, and the DNS records (runbook in the
    new repo).
-2. Deploy the app; log in; inbox shows the history after the first catch-up.
-3. Add the Hub's "Copy To Azolute App" nodes (additive) and the Settings API.
-4. Use it alongside the laptop inbox; retire the laptop app when happy.
+3. Deploy the app; log in. Once the Inbox API is live, the inbox shows the
+   history after the first catch-up.
+4. After the cutover is stable: add the Hub's "Copy To Azolute App" nodes
+   (additive) and the Settings API.
+5. Use it alongside the laptop inbox; retire the laptop app when happy.
 
 Rollback: disable the Hub's copy nodes; the Hub and laptop inbox are untouched.
 
