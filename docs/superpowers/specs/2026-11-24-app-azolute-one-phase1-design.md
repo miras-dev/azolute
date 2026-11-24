@@ -1,7 +1,11 @@
 # app.azolute.one, phase 1: design
 
-Date: 2026-11-24. Status: draft for approval (builder check done; Miras's
-answers added).
+Date: 2026-11-24. Status: **paused**: finished (builder check done, Miras's
+answers added) but not approved for building. Miras paused the app on
+2026-11-24 to follow the strategy's build order: the portal waits until about
+ten paying clients (see `docs/changes/2026-11-24-strategy-and-pricing.md`).
+Recheck it then, especially the AWS-versus-EU-server choice, since n8n and its
+data move to an EU server in December 2026.
 Parent plan: `docs/app-azolute-one-plan.md` (features F1–F4 and 1).
 
 ## Why

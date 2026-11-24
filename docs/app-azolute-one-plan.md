@@ -1,8 +1,16 @@
 # app.azolute.one: the plan
 
-Status: **planned, not built.** Started 2026-11-24. Read this first in any new
-chat about app.azolute.one. Add features to the list below instead of starting
-a new plan.
+Status: **paused (2026-11-24), not built.** Miras paused the app the same day
+to follow the build order in `docs/changes/2026-11-24-strategy-and-pricing.md`:
+the admin and client portal waits until about ten paying clients (2028),
+because it would take 2–4 months of all the 2027 build time. The phase 1
+design is finished and kept for then
+(`docs/superpowers/specs/2026-11-24-app-azolute-one-phase1-design.md`).
+Until then the inbox is the WhatsApp Business app and the laptop inbox, and the
+chats move to the EU with n8n (December list), not to AWS.
+
+Read this first in any new chat about app.azolute.one. Add features to the list
+below instead of starting a new plan.
 
 ## What it is
 
