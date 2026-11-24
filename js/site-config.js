@@ -45,6 +45,14 @@ window.AZOLUTE_CONFIG = {
         webhookUrl: 'https://n8n-jrkw.srv2144760.hstgr.cloud/webhook/azolute-contact'
     },
 
+    /* German call-back form on de/index.html ("Rückruf anfordern").
+       webhookUrl: the production URL of docs/n8n/azolute-rueckruf-de.json.
+       Changes when n8n moves to the EU server (docs/de-launch-checklist.md).
+       Only the de/ pages read this, so the English pages' ?v= stays. */
+    callbackForm: {
+        webhookUrl: 'https://n8n-jrkw.srv2144760.hstgr.cloud/webhook/azolute-rueckruf'
+    },
+
     /* Live proof strip on ecosystem.html. The strip stays hidden until
        data/stats.json exists (an n8n cron writes it straight to S3,
        see docs/demo-layer-setup.md). */
