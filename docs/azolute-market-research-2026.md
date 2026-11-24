@@ -118,7 +118,7 @@ The habit of changing prices costs more than any single discount, because every 
 | Booking Desk | €199 a month + €990 setup | WhatsApp booking with one-tap owner approval, guest messages, inbox and alerts, missed-call text-back, daily owner report, AVV, AI disclosure; works with the venue's reservation tool | Managed entry €109–249; setup €149–2,000 |
 | Booking Desk + Phone (from Q3 2027) | €349 a month + €1,490 setup | Adds AI phone answering (fair use 1,000 minutes), review requests to every guest, deposit link where the venue's terms allow | Mid tiers €279–599 |
 | Content add-on (desk clients only) | €290 a month; €390 with 2 AI reels | 8 posts, 8 stories, labels on realistic AI images | €300–700 for 8–12 posts |
-| Founding-client rate (first one to three clients) | €149 a month for 12 months, no setup fee | In return for a case study, a Google review and three introductions | — |
+| Founding-client rate (founding client only) | €149 a month for 12 months, no setup fee | In return for a case study, a Google review and three introductions | — |
 | Booking-ready website | €1,490 | One page with a booking form feeding the desk, Impressum and privacy page | Freelancer €800–5,000 |
 | Business website | €2,900 | 5–8 pages | Small agency €2,500–8,000 |
 | Shopify starter shop | €2,900, referral only | Theme-based, up to 50 products | Freelancer €2,000–5,000 |
