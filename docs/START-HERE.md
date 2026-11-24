@@ -115,9 +115,9 @@ State checked live on 24 Nov 2026:
 
 | Workflow | Id | Active | Git export |
 |---|---|---|---|
-| WhatsApp Hub | `IorCSvwB305dpU5g` | no (built, tested) | none; n8n keeps the version history |
-| WhatsApp Hub · Inbox API | `BuatfauT1gooTQ9q` | no (built, tested) | none |
-| WhatsApp Hub · Alerts | `M8FOdndi0Jfx2Qv6` | **yes** (only acts on failures) | none |
+| WhatsApp Hub | `IorCSvwB305dpU5g` | no (built, tested) | `docs/n8n/whatsapp-hub.json` (24 Nov) |
+| WhatsApp Hub · Inbox API | `BuatfauT1gooTQ9q` | no (built, tested) | `docs/n8n/whatsapp-hub-inbox-api.json` (24 Nov) |
+| WhatsApp Hub · Alerts | `M8FOdndi0Jfx2Qv6` | **yes** (only acts on failures) | `docs/n8n/whatsapp-hub-alerts.json` (24 Nov) |
 | Content Engine · Owner Replies | `7b7LKdOUEbPPUctx` | no; called by the Hub | `docs/n8n/content-engine-owner-replies.json` (matches the latest version) |
 | Content Engine · Plan Post | `dJQEkHIlElhTMr14` | no (Mon/Wed/Fri 10:00 when on) | `docs/n8n/content-engine-plan-post.json` |
 | Content Engine · Render & Preview | `7MMg2MhNJJQfXw3A` | no (sub-workflow) | `docs/n8n/content-engine-render-preview.json` |
@@ -141,7 +141,13 @@ Notes from the 24 Nov check:
   positions changed. On 24 Nov its webhook was restricted to azolute.one and
   www.azolute.one (it was `*`), the same as Site Chat; tested with preflight
   checks and a honeypot POST, which took the silent-drop path (no email).
-- The Hub, Inbox API and Alerts have no git export yet.
+- The Hub, Inbox API and Alerts were exported on 24 Nov, so every Azolute
+  workflow now has a copy in `docs/n8n/`. They hold no secrets: the café's
+  shared secret, phone number id and alert address are read from
+  `hub_settings` at run time, and keys live in n8n credentials. On a fresh
+  import, pick the credentials again: the WhatsApp trigger, the WhatsApp API
+  (Meta calls), the Inbox Key header credential on the four Inbox API
+  webhooks, and SMTP.
 
 ### Other repos in this work
 
@@ -188,8 +194,7 @@ Notes from the 24 Nov check:
 3. Plan the move of n8n and client data to an EU server.
 4. German sales kit: one-page booking-desk site in German, AVV with
    sub-processor list, AI disclosure text, German price card.
-5. Optional: export the Hub, Inbox API and Alerts to `docs/n8n/`.
-6. After the EU server move, add "EU hosting" to the website's Booking Desk
+5. After the EU server move, add "EU hosting" to the website's Booking Desk
    card and the Site Chat facts.
 
 **Q1 2027:** German business set-up (Gewerbe, ELSTER, VAT choice, insurance,

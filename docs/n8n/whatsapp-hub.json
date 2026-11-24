@@ -1,0 +1,1886 @@
+{
+  "name": "WhatsApp Hub",
+  "nodes": [
+    {
+      "id": "56c750a0-a3ec-4d5c-860d-0af58a9fa4ea",
+      "name": "WhatsApp In",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        384
+      ],
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": [
+            "all"
+          ]
+        }
+      },
+      "webhookId": "ce920caf-d54a-4ae1-abce-e37d0d1581fd"
+    },
+    {
+      "id": "c3e3eff0-87f2-4075-b5e8-eb46891f9f13",
+      "name": "Load Hub Settings",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        384
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SzK9AOIHvuDsOEGi",
+          "cachedResultName": "hub_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "azolute"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "571f8ecb-b36b-4dbf-b479-720b4e7b2129",
+      "name": "Split Into Messages And Statuses",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        384
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// One item per message and per status update, in the wa_messages shape.\nconst digits = (s) => String(s ?? '').replace(/\\D/g, '');\nconst iso = (ts) => (ts ? new Date(Number(ts) * 1000) : new Date()).toISOString();\nconst settings = $('Load Hub Settings').first().json;\nconst out = [];\nfor (const item of $('WhatsApp In').all()) {\n  const v = item.json.value ?? item.json;\n  const pid = String(v.metadata?.phone_number_id ?? '');\n  const names = {};\n  for (const c of v.contacts ?? []) names[c.wa_id] = c.profile?.name ?? '';\n  for (const m of v.messages ?? []) {\n    const media = m.image ?? m.audio ?? m.video ?? m.document ?? m.sticker ?? null;\n    const payload = m.button?.payload ?? m.interactive?.button_reply?.id ?? m.interactive?.list_reply?.id ?? '';\n    // A café owner's Confirm / Decline tap, on Azolute's own number only.\n    const cafe = /^toasty:(confirm|decline):[A-Za-z0-9]+$/.test(payload) && pid !== '' && pid === String(settings.azolute_phone_number_id ?? '');\n    out.push({ json: {\n      kind: 'message', wamid: m.id, direction: 'in', phone_number_id: pid,\n      contact: digits(m.from), contact_name: names[m.from] ?? '', type: m.type ?? '',\n      text: m.text?.body ?? media?.caption ?? m.button?.text ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? m.location?.name ?? '',\n      payload, media_id: media?.id ?? '', media_mime: media?.mime_type ?? '',\n      error: m.errors?.[0]?.title ?? '', at: iso(m.timestamp), updated_ms: Date.now(),\n      route: cafe ? 'toasty' : 'other',\n      // The original webhook value with only this message: what Owner Replies reads.\n      value: { messaging_product: v.messaging_product, metadata: v.metadata, contacts: (v.contacts ?? []).filter((c) => c.wa_id === m.from), messages: [m] },\n    } });\n  }\n  for (const s of v.statuses ?? []) {\n    const e = s.errors?.[0];\n    out.push({ json: {\n      kind: 'status', wamid: s.id, direction: 'out', phone_number_id: pid,\n      contact: digits(s.recipient_id), status: s.status ?? '',\n      error: e ? (e.error_data?.details ?? e.message ?? e.title ?? 'error') + ' (' + (e.code ?? '') + ')' : '',\n      source: s.biz_opaque_callback_data ?? '', at: iso(s.timestamp), updated_ms: Date.now(),\n    } });\n  }\n}\nreturn out;\n"
+      }
+    },
+    {
+      "id": "f592ac13-8b62-4129-bf91-94bd11dcd227",
+      "name": "Message Or Status?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        384
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.kind }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "message"
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "9d4712cc-d407-451a-bbb4-587b35fa99cc",
+      "name": "Not Logged Yet?",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        288
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "keyValue": "={{ $json.wamid }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "25e0d920-fe83-4b2f-8395-1f1a0d416726",
+      "name": "Log Message",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        288
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "schema": [
+            {
+              "id": "wamid",
+              "type": "string"
+            },
+            {
+              "id": "direction",
+              "type": "string"
+            },
+            {
+              "id": "phone_number_id",
+              "type": "string"
+            },
+            {
+              "id": "contact",
+              "type": "string"
+            },
+            {
+              "id": "contact_name",
+              "type": "string"
+            },
+            {
+              "id": "type",
+              "type": "string"
+            },
+            {
+              "id": "text",
+              "type": "string"
+            },
+            {
+              "id": "payload",
+              "type": "string"
+            },
+            {
+              "id": "media_id",
+              "type": "string"
+            },
+            {
+              "id": "media_mime",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "type": "string"
+            },
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "at",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            },
+            {
+              "id": "raw",
+              "type": "string"
+            }
+          ],
+          "value": {
+            "at": "={{ $json.at }}",
+            "contact": "={{ $json.contact }}",
+            "contact_name": "={{ $json.contact_name }}",
+            "direction": "in",
+            "error": "={{ $json.error }}",
+            "media_id": "={{ $json.media_id }}",
+            "media_mime": "={{ $json.media_mime }}",
+            "payload": "={{ $json.payload }}",
+            "phone_number_id": "={{ $json.phone_number_id }}",
+            "raw": "={{ JSON.stringify($json.value ?? {}).slice(0, 20000) }}",
+            "routed_to": "none",
+            "source": "",
+            "status": "received",
+            "text": "={{ $json.text }}",
+            "type": "={{ $json.type }}",
+            "updated_ms": "={{ Date.now() }}",
+            "wamid": "={{ $json.wamid }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "a7ba7989-1cb8-4aaf-8a4a-f8a192d95a54",
+      "name": "Café Decision?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        288
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Not Logged Yet?').item.json.route }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "toasty"
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "ad7e692d-3191-42ad-9de5-4339b5252d83",
+      "name": "Build Decision",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        128
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "action",
+              "value": "decision",
+              "type": "string"
+            },
+            {
+              "id": "d2",
+              "name": "booking",
+              "value": "={{ $('Not Logged Yet?').item.json.payload.split(':')[2] }}",
+              "type": "string"
+            },
+            {
+              "id": "d3",
+              "name": "decision",
+              "value": "={{ $('Not Logged Yet?').item.json.payload.split(':')[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "d4",
+              "name": "from",
+              "value": "={{ $('Not Logged Yet?').item.json.contact }}",
+              "type": "string"
+            },
+            {
+              "id": "d5",
+              "name": "ts",
+              "value": "={{ Date.now() }}",
+              "type": "number"
+            },
+            {
+              "id": "d6",
+              "name": "wamid",
+              "value": "={{ $('Not Logged Yet?').item.json.wamid }}",
+              "type": "string"
+            },
+            {
+              "id": "d7",
+              "name": "phone_number_id",
+              "value": "={{ $('Not Logged Yet?').item.json.phone_number_id }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "7127494b-148a-4410-a956-6d7d2c53d52c",
+      "name": "Sign Decision",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        128
+      ],
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ [$json.action, $json.booking, $json.decision, $json.from, $json.ts].join('|') }}",
+        "dataPropertyName": "sig",
+        "secret": "={{ $('Load Hub Settings').first().json.cafe_hub_secret }}",
+        "encoding": "hex"
+      }
+    },
+    {
+      "id": "76a02d31-cdbe-405c-aea4-66b3c5efeef8",
+      "name": "Ask The Café",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2016,
+        128
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Load Hub Settings').first().json.cafe_script_url }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ action: $json.action, booking: $json.booking, decision: $json.decision, from: $json.from, ts: $json.ts, sig: $json.sig }) }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": true,
+              "maxRedirects": 5
+            }
+          }
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "f679f9aa-7579-4e50-bfce-f0a662bebd50",
+      "name": "Mark Routed To Café",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        48
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "condition": "eq",
+              "keyValue": "={{ $('Build Decision').item.json.wamid }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "routed_to": "toasty",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6629c468-88f7-4af4-bfa4-dcc13dc2ee9b",
+      "name": "Anything To Tell The Owner?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2464,
+        48
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Ask The Café').item.json.ownerText ?? '' }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "04b3dc43-ddaa-4a72-b462-6c0c3be1155b",
+      "name": "Reply To The Café Owner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2688,
+        48
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Load Hub Settings').first().json.graph_version || 'v23.0' }}/{{ $('Build Decision').item.json.phone_number_id }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $('Build Decision').item.json.from, type: 'text', text: { body: $('Ask The Café').item.json.ownerText }, biz_opaque_callback_data: 'hub' }) }}",
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "b1b2f72e-be50-4a4a-adff-0f289a234992",
+      "name": "Log Reply To Owner",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2912,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "wamid": "={{ $json.messages[0].id }}",
+            "direction": "out",
+            "phone_number_id": "={{ $('Build Decision').item.json.phone_number_id }}",
+            "contact": "={{ $('Build Decision').item.json.from }}",
+            "type": "text",
+            "text": "={{ $('Ask The Café').item.json.ownerText }}",
+            "status": "sent",
+            "source": "hub",
+            "routed_to": "",
+            "at": "={{ $now.toISO() }}",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "wamid",
+              "type": "string"
+            },
+            {
+              "id": "direction",
+              "type": "string"
+            },
+            {
+              "id": "phone_number_id",
+              "type": "string"
+            },
+            {
+              "id": "contact",
+              "type": "string"
+            },
+            {
+              "id": "type",
+              "type": "string"
+            },
+            {
+              "id": "text",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "type": "string"
+            },
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "at",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aa4ddae2-d7fd-4dc6-8326-f8f504629f66",
+      "name": "Find Content Client",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1568,
+        512
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "FgcxxifTQHm8YADN",
+          "cachedResultName": "content_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_phone_number_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Not Logged Yet?').item.json.phone_number_id || '__none__' }}"
+            }
+          ]
+        },
+        "limit": 1
+      }
+    },
+    {
+      "id": "a811c53d-6d12-4dbe-99a4-95189ae23cc9",
+      "name": "From The Client's Owner?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        512
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ String($json.owner_whatsapp ?? '').replace(/\\D/g, '') }}",
+              "rightValue": "={{ $('Not Logged Yet?').item.json.contact }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "21023d69-9798-4faa-8e5b-4946d25945ee",
+      "name": "Message For Owner Replies",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2016,
+        512
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "o1",
+              "name": "value",
+              "value": "={{ $('Not Logged Yet?').item.json.value }}",
+              "type": "object"
+            },
+            {
+              "id": "o2",
+              "name": "client_key",
+              "value": "={{ $json.client_key }}",
+              "type": "string"
+            },
+            {
+              "id": "o3",
+              "name": "wamid",
+              "value": "={{ $('Not Logged Yet?').item.json.wamid }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "be664dc9-b93c-405a-a464-4bdaa0f4131b",
+      "name": "Content Engine · Owner Replies",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2240,
+        512
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "7b7LKdOUEbPPUctx",
+          "cachedResultName": "Content Engine · Owner Replies"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "eeee8984-1c72-4d9c-9bee-061d1573e17f",
+      "name": "Mark Routed To Content",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2464,
+        416
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "condition": "eq",
+              "keyValue": "={{ $('Message For Owner Replies').item.json.wamid }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "routed_to": "content",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "99c0d06d-24f2-4c18-8566-9db307d76296",
+      "name": "Log Status",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        480
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "condition": "eq",
+              "keyValue": "={{ $json.wamid }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "wamid": "={{ $json.wamid }}",
+            "direction": "out",
+            "phone_number_id": "={{ $json.phone_number_id }}",
+            "contact": "={{ $json.contact }}",
+            "status": "={{ $json.status }}",
+            "error": "={{ $json.error }}",
+            "source": "={{ $json.source }}",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "wamid",
+              "type": "string"
+            },
+            {
+              "id": "direction",
+              "type": "string"
+            },
+            {
+              "id": "phone_number_id",
+              "type": "string"
+            },
+            {
+              "id": "contact",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5640a229-fb17-419f-a6a8-b5d6ea5b9068",
+      "name": "Note Café Error",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2912,
+        224
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "condition": "eq",
+              "keyValue": "={{ $('Build Decision').item.json.wamid }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "routed_to": "toasty",
+            "error": "={{ 'Café step failed: ' + ($json.error?.message ?? $json.error ?? 'unknown error') }}",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ffd8e32e-0151-4586-aa17-63389db89bb3",
+      "name": "Note Content Engine Error",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2464,
+        608
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "condition": "eq",
+              "keyValue": "={{ $('Message For Owner Replies').item.json.wamid }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "routed_to": "content",
+            "error": "={{ 'Content Engine failed: ' + ($json.error?.message ?? $json.error ?? 'unknown error') }}",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0b3709a5-4b7d-493f-ad13-a1170ddd97e2",
+      "name": "Sticky Note b27f5800",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        288
+      ],
+      "parameters": {
+        "content": "## WhatsApp Hub\nEvery WhatsApp message and status for the Meta app lands here.\n\n1. Split the webhook into one item per message / status.\n2. Messages are logged once in `wa_messages` (Meta can deliver twice), then routed:\n   - a café owner's Confirm / Decline tap → the café's Apps Script, and its answer back to the owner;\n   - anything from a Content Engine client's owner → Owner Replies;\n   - everything else stays in the log for the inbox.\n3. Statuses update the sent message's row, or add one for messages other systems sent.\n\nSettings: `hub_settings` table. Errors are written on the row.",
+        "color": 4,
+        "width": 608,
+        "height": 224
+      }
+    },
+    {
+      "id": "c003de90-e2e9-433a-bf32-04c26c24a137",
+      "name": "Alert: Café Step Failed",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        3136,
+        224
+      ],
+      "parameters": {
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "WhatsApp Hub · Alerts",
+          "mode": "id",
+          "value": "M8FOdndi0Jfx2Qv6"
+        }
+      }
+    },
+    {
+      "id": "1856fbe6-1866-4048-8545-f7ec77c5dfe5",
+      "name": "Alert: Content Engine Failed",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2688,
+        608
+      ],
+      "parameters": {
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "WhatsApp Hub · Alerts",
+          "mode": "id",
+          "value": "M8FOdndi0Jfx2Qv6"
+        }
+      }
+    },
+    {
+      "id": "d401d886-cb9a-41ba-8268-22b7bee82ac2",
+      "name": "What Went Wrong (café)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3024,
+        224
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "w1",
+              "name": "what",
+              "type": "string",
+              "value": "Café step failed"
+            },
+            {
+              "id": "w2",
+              "name": "wamid",
+              "type": "string",
+              "value": "={{ $('Build Decision').item.json.wamid }}"
+            },
+            {
+              "id": "w3",
+              "name": "error",
+              "type": "string",
+              "value": "={{ $('Note Café Error').item.json.error ?? 'see the wa_messages row' }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual"
+      }
+    },
+    {
+      "id": "f246b53d-aabb-48b0-9751-8bfd47a668b8",
+      "name": "What Went Wrong (content)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2576,
+        608
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "x1",
+              "name": "what",
+              "type": "string",
+              "value": "Content Engine step failed"
+            },
+            {
+              "id": "x2",
+              "name": "wamid",
+              "type": "string",
+              "value": "={{ $('Message For Owner Replies').item.json.wamid }}"
+            },
+            {
+              "id": "x3",
+              "name": "error",
+              "type": "string",
+              "value": "={{ $('Note Content Engine Error').item.json.error ?? 'see the wa_messages row' }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual"
+      }
+    },
+    {
+      "id": "049d8dc6-490c-4cc8-9dc9-5903496257da",
+      "name": "Send Failed?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        560
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $('Message Or Status?').item.json.status }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "failed"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        }
+      }
+    },
+    {
+      "id": "8b2a9a0a-c6b7-4f97-b44f-c8666f7882ed",
+      "name": "What Went Wrong (send)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        560
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "y1",
+              "name": "what",
+              "type": "string",
+              "value": "={{ 'A message ' + ($('Message Or Status?').item.json.source ? 'from ' + $('Message Or Status?').item.json.source + ' ' : '') + 'could not be delivered' }}"
+            },
+            {
+              "id": "y2",
+              "name": "wamid",
+              "type": "string",
+              "value": "={{ $('Message Or Status?').item.json.wamid }}"
+            },
+            {
+              "id": "y3",
+              "name": "error",
+              "type": "string",
+              "value": "={{ $('Message Or Status?').item.json.error }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual"
+      }
+    },
+    {
+      "id": "ab1e9530-93ef-4bea-9683-ae14a2cb0dce",
+      "name": "Alert: Send Failed",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1568,
+        560
+      ],
+      "parameters": {
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "WhatsApp Hub · Alerts",
+          "mode": "id",
+          "value": "M8FOdndi0Jfx2Qv6"
+        }
+      }
+    },
+    {
+      "id": "8c849952-c1b5-4ebe-a228-52403b92c003",
+      "name": "Settings Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        600
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $('Load Hub Settings').first().json.key ?? '' }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "azolute"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        }
+      }
+    },
+    {
+      "id": "2b7d5e4d-c75e-4768-954a-62c6b668a4ff",
+      "name": "Hub Settings Missing",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        672,
+        680
+      ],
+      "parameters": {
+        "errorMessage": "The hub_settings row 'azolute' is missing. Messages are still logged in wa_messages, but nothing is routed until it's back."
+      }
+    },
+    {
+      "id": "0393d1f1-64d6-4fb2-8dec-10875ea20a07",
+      "name": "Café Said OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        48
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.ok === true }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        }
+      }
+    },
+    {
+      "id": "c8ab6670-9da4-497a-9ca9-2ccc8c5fc599",
+      "name": "Café Refusal",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        -160
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "what",
+              "type": "string",
+              "value": "Café refused a Confirm/Decline tap"
+            },
+            {
+              "id": "r2",
+              "name": "wamid",
+              "type": "string",
+              "value": "={{ $('Build Decision').item.json.wamid }}"
+            },
+            {
+              "id": "r3",
+              "name": "error",
+              "type": "string",
+              "value": "={{ 'Café refused the tap: ' + ($json.reason ?? (typeof $json.data === 'string' ? 'the script answered with a page, not JSON (a script error?)' : 'no clear answer')) }}"
+            },
+            {
+              "id": "r4",
+              "name": "ownerText",
+              "type": "string",
+              "value": "={{ $json.ownerText || \"I couldn't process that tap, so the guest hasn't been told. Please contact them directly.\" }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual"
+      }
+    },
+    {
+      "id": "2c565f30-ff49-4441-9cd3-f9cce85d4eb6",
+      "name": "Alert: Café Refused",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2576,
+        -160
+      ],
+      "parameters": {
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "WhatsApp Hub · Alerts",
+          "mode": "id",
+          "value": "M8FOdndi0Jfx2Qv6"
+        }
+      }
+    },
+    {
+      "id": "64ed8a64-41b8-4d95-bfab-ea976427abd0",
+      "name": "Note Café Refusal",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2800,
+        -160
+      ],
+      "parameters": {
+        "columns": {
+          "mappingMode": "defineBelow",
+          "schema": [
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ],
+          "value": {
+            "error": "={{ $('Café Refusal').item.json.error }}",
+            "routed_to": "toasty",
+            "updated_ms": "={{ Date.now() }}"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "wa_messages",
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "condition": "eq",
+              "keyName": "wamid",
+              "keyValue": "={{ $('Café Refusal').item.json.wamid }}"
+            }
+          ]
+        },
+        "matchType": "allConditions",
+        "operation": "update",
+        "resource": "row"
+      }
+    },
+    {
+      "id": "83cb3aaa-0c5d-482e-a7df-d353cd4ed37f",
+      "name": "Tell The Owner It Didn't Work",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3024,
+        -160
+      ],
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $('Build Decision').item.json.from, type: 'text', text: { body: $('Café Refusal').item.json.ownerText }, biz_opaque_callback_data: 'hub' }) }}",
+        "method": "POST",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "=https://graph.facebook.com/{{ $('Load Hub Settings').first().json.graph_version || 'v23.0' }}/{{ $('Build Decision').item.json.phone_number_id }}/messages"
+      }
+    },
+    {
+      "id": "014c18bf-75ed-4986-97e2-825e8ab59a20",
+      "name": "Guest Message Failed?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        760
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $('Message Or Status?').item.json.status === 'failed' && /^toasty:[A-Za-z0-9]+$/.test($('Message Or Status?').item.json.source ?? '') }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        }
+      }
+    },
+    {
+      "id": "28452bb2-754c-4057-a3f0-c35c92f7fdf1",
+      "name": "Build Failure Report",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        760
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "action",
+              "type": "string",
+              "value": "delivery_failed"
+            },
+            {
+              "id": "f2",
+              "name": "booking",
+              "type": "string",
+              "value": "={{ $('Message Or Status?').item.json.source.split(':')[1] }}"
+            },
+            {
+              "id": "f3",
+              "name": "decision",
+              "type": "string",
+              "value": "failed"
+            },
+            {
+              "id": "f4",
+              "name": "from",
+              "type": "string",
+              "value": "={{ $('Message Or Status?').item.json.contact }}"
+            },
+            {
+              "id": "f5",
+              "name": "ts",
+              "type": "number",
+              "value": "={{ Date.now() }}"
+            },
+            {
+              "id": "f6",
+              "name": "error",
+              "type": "string",
+              "value": "={{ $('Message Or Status?').item.json.error }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual"
+      }
+    },
+    {
+      "id": "682fae36-7c7d-4383-90ae-61582d8e7ee2",
+      "name": "Sign Failure Report",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        760
+      ],
+      "parameters": {
+        "action": "hmac",
+        "dataPropertyName": "sig",
+        "encoding": "hex",
+        "secret": "={{ $('Load Hub Settings').first().json.cafe_hub_secret }}",
+        "type": "SHA256",
+        "value": "={{ [$json.action, $json.booking, $json.decision, $json.from, $json.ts].join('|') }}"
+      }
+    },
+    {
+      "id": "94bae121-8635-438a-9795-6742902e8ea7",
+      "name": "Tell The Café",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1792,
+        760
+      ],
+      "parameters": {
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ action: $json.action, booking: $json.booking, decision: $json.decision, from: $json.from, ts: $json.ts, error: $json.error, sig: $json.sig }) }}",
+        "method": "POST",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": true,
+              "maxRedirects": 5
+            }
+          },
+          "timeout": 30000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "={{ $('Load Hub Settings').first().json.cafe_script_url }}"
+      }
+    }
+  ],
+  "connections": {
+    "WhatsApp In": {
+      "main": [
+        [
+          {
+            "node": "Load Hub Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Hub Settings": {
+      "main": [
+        [
+          {
+            "node": "Split Into Messages And Statuses",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Settings Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Messages And Statuses": {
+      "main": [
+        [
+          {
+            "node": "Message Or Status?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Or Status?": {
+      "main": [
+        [
+          {
+            "node": "Not Logged Yet?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Logged Yet?": {
+      "main": [
+        [
+          {
+            "node": "Log Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Message": {
+      "main": [
+        [
+          {
+            "node": "Café Decision?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Café Decision?": {
+      "main": [
+        [
+          {
+            "node": "Build Decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Content Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Decision": {
+      "main": [
+        [
+          {
+            "node": "Sign Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign Decision": {
+      "main": [
+        [
+          {
+            "node": "Ask The Café",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask The Café": {
+      "main": [
+        [
+          {
+            "node": "Café Said OK?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Note Café Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Routed To Café": {
+      "main": [
+        [
+          {
+            "node": "Anything To Tell The Owner?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything To Tell The Owner?": {
+      "main": [
+        [
+          {
+            "node": "Reply To The Café Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply To The Café Owner": {
+      "main": [
+        [
+          {
+            "node": "Log Reply To Owner",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Note Café Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Content Client": {
+      "main": [
+        [
+          {
+            "node": "From The Client's Owner?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "From The Client's Owner?": {
+      "main": [
+        [
+          {
+            "node": "Message For Owner Replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message For Owner Replies": {
+      "main": [
+        [
+          {
+            "node": "Content Engine · Owner Replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Engine · Owner Replies": {
+      "main": [
+        [
+          {
+            "node": "Mark Routed To Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Note Content Engine Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Note Café Error": {
+      "main": [
+        [
+          {
+            "node": "What Went Wrong (café)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Went Wrong (café)": {
+      "main": [
+        [
+          {
+            "node": "Alert: Café Step Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Note Content Engine Error": {
+      "main": [
+        [
+          {
+            "node": "What Went Wrong (content)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Went Wrong (content)": {
+      "main": [
+        [
+          {
+            "node": "Alert: Content Engine Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Status": {
+      "main": [
+        [
+          {
+            "node": "Send Failed?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Guest Message Failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Failed?": {
+      "main": [
+        [
+          {
+            "node": "What Went Wrong (send)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Went Wrong (send)": {
+      "main": [
+        [
+          {
+            "node": "Alert: Send Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings Found?": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Hub Settings Missing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Café Said OK?": {
+      "main": [
+        [
+          {
+            "node": "Mark Routed To Café",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Café Refusal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Café Refusal": {
+      "main": [
+        [
+          {
+            "node": "Alert: Café Refused",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert: Café Refused": {
+      "main": [
+        [
+          {
+            "node": "Note Café Refusal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Note Café Refusal": {
+      "main": [
+        [
+          {
+            "node": "Tell The Owner It Didn't Work",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guest Message Failed?": {
+      "main": [
+        [
+          {
+            "node": "Build Failure Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Failure Report": {
+      "main": [
+        [
+          {
+            "node": "Sign Failure Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign Failure Report": {
+      "main": [
+        [
+          {
+            "node": "Tell The Café",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "M8FOdndi0Jfx2Qv6"
+  },
+  "pinData": {}
+}

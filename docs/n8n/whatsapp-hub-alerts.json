@@ -1,0 +1,226 @@
+{
+  "name": "WhatsApp Hub · Alerts",
+  "nodes": [
+    {
+      "id": "e8e25ce1-599f-4818-8945-7d7f36d638fd",
+      "name": "A Workflow Failed",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "870fd7f2-32f7-44c4-884e-d8927fe15995",
+      "name": "Describe The Failure",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "what",
+              "value": "={{ ($json.workflow?.name ?? 'A workflow') + ' failed' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "detail",
+              "value": "={{ 'Step: ' + ($json.execution?.lastNodeExecuted ?? '?') + '\\nError: ' + ($json.execution?.error?.message ?? 'unknown') + '\\nRun: ' + ($json.execution?.url ?? '') }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ef84e367-a7b3-4ae6-9771-feb65b3a5c47",
+      "name": "Who To Tell",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SzK9AOIHvuDsOEGi",
+          "cachedResultName": "hub_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "azolute"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "47aff99f-5c3b-4e0a-8819-5afc68d47341",
+      "name": "Email The Owner",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        96
+      ],
+      "parameters": {
+        "operation": "send",
+        "fromEmail": "Azolute n8n <noreply@azolute.one>",
+        "toEmail": "={{ $json.alert_email || 'miras@azolute.one' }}",
+        "subject": "={{ 'WhatsApp Hub: ' + ($('Describe The Failure').isExecuted ? $('Describe The Failure').first().json.what : $('Describe The Problem').first().json.what) }}",
+        "emailFormat": "text",
+        "text": "={{ $('Describe The Failure').isExecuted ? $('Describe The Failure').first().json.detail : $('Describe The Problem').first().json.detail }}\n\nNothing was lost: every message is in the wa_messages table first. Open n8n → Executions to see the run.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "8c35c167-4885-412a-a08e-1798b2d7811a",
+      "credentials": {
+        "smtp": {
+          "id": "JU7W8yNmqyToDIQZ",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "id": "dc7aeffb-21d9-49d0-99c7-d5dea543b903",
+      "name": "Called By The Hub",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        192
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "36d5430f-6116-4ca4-81e3-ff75328d02b5",
+      "name": "Describe The Problem",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        192
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "what",
+              "value": "={{ $json.what ?? 'WhatsApp problem' }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "detail",
+              "value": "={{ 'Message id: ' + ($json.wamid ?? '?') + '\\nError: ' + ($json.error ?? 'unknown') + '\\nSee the row in the wa_messages table.' }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5ade776c-ee8e-4bb0-87be-3deaa566a647",
+      "name": "Sticky Note 6ef2e5c6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -96
+      ],
+      "parameters": {
+        "content": "## WhatsApp Hub · Alerts\nError workflow for WhatsApp Hub, its Inbox API and Owner Replies, and called by the Hub when a message can't be routed or Meta reports a failed send. Emails `alert_email` from `hub_settings`. Never includes the message text.",
+        "color": 3,
+        "width": 160,
+        "height": 416
+      }
+    }
+  ],
+  "connections": {
+    "A Workflow Failed": {
+      "main": [
+        [
+          {
+            "node": "Describe The Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe The Failure": {
+      "main": [
+        [
+          {
+            "node": "Who To Tell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Who To Tell": {
+      "main": [
+        [
+          {
+            "node": "Email The Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Called By The Hub": {
+      "main": [
+        [
+          {
+            "node": "Describe The Problem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe The Problem": {
+      "main": [
+        [
+          {
+            "node": "Who To Tell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

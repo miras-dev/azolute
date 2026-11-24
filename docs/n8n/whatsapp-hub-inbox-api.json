@@ -1,0 +1,1002 @@
+{
+  "name": "WhatsApp Hub · Inbox API",
+  "nodes": [
+    {
+      "id": "36582969-0c1f-453f-a349-68c6a1dbb911",
+      "name": "GET messages",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "wa-inbox/messages",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "8eb42ed7-0672-45e0-9571-189b7423fd19"
+    },
+    {
+      "id": "928e1338-b63d-4b3b-9188-7cc825d50aad",
+      "name": "Hub Settings (messages)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SzK9AOIHvuDsOEGi",
+          "cachedResultName": "hub_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "azolute"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "426c1d4b-d53a-48db-8fe7-53a7baceb1e4",
+      "name": "Read Messages Since",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_number_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.azolute_phone_number_id }}"
+            },
+            {
+              "keyName": "updated_ms",
+              "condition": "gte",
+              "keyValue": "={{ Number($('GET messages').first().json.query.since ?? 0) || 0 }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": "={{ Math.min(Math.max(Number($('GET messages').first().json.query.limit ?? 500) || 500, 1), 1000) }}",
+        "orderBy": true,
+        "orderByColumn": "updated_ms",
+        "orderByDirection": "ASC"
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "8f68541e-af2d-4dd5-93fb-24a275efddeb",
+      "name": "Shape Page",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Rows changed since `since` (ms), oldest first. The inbox asks again with since = next\n// and merges by wamid (rows with the same updated_ms can repeat across pages).\nconst rows = $input.all().map((i) => i.json).filter((r) => r && r.wamid);\nconst since = Number($('GET messages').first().json.query.since ?? 0) || 0;\nconst next = rows.length ? rows[rows.length - 1].updated_ms : since;\nreturn [{ json: { rows, next } }];"
+      }
+    },
+    {
+      "id": "56ce899a-bc1d-455c-8a22-01174cbe6b77",
+      "name": "Answer Messages",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "7735ae8c-b4f2-407a-bd75-e4e712407f8c",
+      "name": "POST send",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        416
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-inbox/send",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "b43660f7-21cf-47a1-813b-d28b8ea7cf51"
+    },
+    {
+      "id": "252f892e-2e9d-40a7-86bd-bd63bd151647",
+      "name": "Hub Settings (send)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        416
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SzK9AOIHvuDsOEGi",
+          "cachedResultName": "hub_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "azolute"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "3a9f618a-75e5-48f9-91de-d55f808e5ee4",
+      "name": "Read Send Request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        416
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "to",
+              "value": "={{ String($('POST send').first().json.body?.to ?? '').replace(/\\D/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "s2",
+              "name": "text",
+              "value": "={{ String($('POST send').first().json.body?.text ?? '').trim().slice(0, 4096) }}",
+              "type": "string"
+            },
+            {
+              "id": "s3",
+              "name": "phone_number_id",
+              "value": "={{ $json.azolute_phone_number_id }}",
+              "type": "string"
+            },
+            {
+              "id": "s4",
+              "name": "graph_version",
+              "value": "={{ $json.graph_version || 'v23.0' }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2447ed18-b4ed-44e8-a0a9-b33ab0e86d5c",
+      "name": "Number And Text?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        416
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.to.length >= 8 && $json.to.length <= 15 }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "leftValue": "={{ $json.text }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "e93ae0fe-ba1d-41f9-a388-af0ca8b71e23",
+      "name": "Send Through Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        896,
+        320
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $json.graph_version }}/{{ $json.phone_number_id }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.to, type: 'text', text: { body: $json.text }, biz_opaque_callback_data: 'inbox' }) }}",
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "58432035-eaca-41f1-92a3-6734bb2e089f",
+      "name": "Log Sent Reply",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        224
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "wamid": "={{ $json.messages[0].id }}",
+            "direction": "out",
+            "phone_number_id": "={{ $('Read Send Request').item.json.phone_number_id }}",
+            "contact": "={{ $('Read Send Request').item.json.to }}",
+            "type": "text",
+            "text": "={{ $('Read Send Request').item.json.text }}",
+            "status": "sent",
+            "error": "",
+            "source": "inbox",
+            "routed_to": "",
+            "at": "={{ $now.toUTC().toISO() }}",
+            "updated_ms": "={{ Date.now() }}"
+          },
+          "schema": [
+            {
+              "id": "wamid",
+              "type": "string"
+            },
+            {
+              "id": "direction",
+              "type": "string"
+            },
+            {
+              "id": "phone_number_id",
+              "type": "string"
+            },
+            {
+              "id": "contact",
+              "type": "string"
+            },
+            {
+              "id": "type",
+              "type": "string"
+            },
+            {
+              "id": "text",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "type": "string"
+            },
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "at",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a6fb5d53-8b56-45c2-853d-3e1ee79853b8",
+      "name": "Answer Sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1344,
+        224
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, row: $json }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "9fc76197-cd78-474c-a444-3db1630f0508",
+      "name": "Answer Bad Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        512
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"ok\": false, \"error\": \"Need a phone number (digits, with country code) and a message.\"}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    },
+    {
+      "id": "66350aad-5d6d-4bb7-8363-9acac5efe802",
+      "name": "Answer Send Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        416
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, error: String($json.error?.description ?? $json.error?.message ?? $json.error ?? 'Meta refused the message') }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "d94ef778-1b2d-4250-ae9f-2811112af57b",
+      "name": "GET media",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        864
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "wa-inbox/media",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "af0df4bd-6e66-4934-9408-2ea904e8c9cc"
+    },
+    {
+      "id": "c1e41dbc-4332-4fb3-b11b-3d8412dc16ce",
+      "name": "Hub Settings (media)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        864
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SzK9AOIHvuDsOEGi",
+          "cachedResultName": "hub_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "azolute"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "4bfe5b43-08e5-4419-9c31-18294c0d5f50",
+      "name": "Ask Meta For The File Link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        864
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://graph.facebook.com/{{ $json.graph_version || 'v23.0' }}/{{ String($('GET media').first().json.query.id ?? '').replace(/[^A-Za-z0-9_.-]/g, '') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "c82ac7de-4ae6-417c-9d9a-5ed9bac37b45",
+      "name": "Download The File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        672,
+        784
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "b5d63a50-bd60-4739-960b-9955febcaefe",
+      "name": "Answer File",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        736
+      ],
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "inputFieldName": "data",
+        "options": {}
+      }
+    },
+    {
+      "id": "b2608f0e-fa69-4151-a9ff-ed37d01ab0d4",
+      "name": "Answer File Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        960
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"ok\": false, \"error\": \"Media not found or expired (Meta keeps incoming media for about 7 days).\"}",
+        "options": {
+          "responseCode": 404
+        }
+      }
+    },
+    {
+      "id": "b51e74a2-3375-4735-9197-ae06a924bb9d",
+      "name": "POST import",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        1280
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wa-inbox/import",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "2c1a5f34-4028-4aea-824a-c9af5a7e787e"
+    },
+    {
+      "id": "55b4bebc-3606-4488-abcc-4e437f312716",
+      "name": "Hub Settings (import)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        1280
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SzK9AOIHvuDsOEGi",
+          "cachedResultName": "hub_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "condition": "eq",
+              "keyValue": "azolute"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "cb9c2164-b059-4931-b6cc-2081346aee23",
+      "name": "Clean Imported Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        1280
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Old chats from Twilio's log, one item per message, on Azolute's number.\n// updated_ms is now, so a running inbox picks them up on its next poll (it sorts by `at`).\nconst pid = String($('Hub Settings (import)').first().json.azolute_phone_number_id ?? '');\nconst s = (v, n) => String(v ?? '').slice(0, n);\nconst rows = $('POST import').first().json.body?.rows;\nconst now = Date.now();\nconst out = [];\nfor (const r of Array.isArray(rows) ? rows.slice(0, 1000) : []) {\n  if (!r || !r.wamid) continue;\n  out.push({ json: {\n    wamid: s(r.wamid, 200), direction: r.direction === 'out' ? 'out' : 'in', phone_number_id: pid,\n    contact: s(r.contact, 20).replace(/\\D/g, ''), contact_name: s(r.contact_name, 100), type: s(r.type || 'text', 20),\n    text: s(r.text, 4096), status: s(r.status, 20), error: s(r.error, 500), source: 'twilio-import',\n    media_mime: s(r.media_mime, 100), at: s(r.at, 40), updated_ms: now,\n  } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "1d0c7dd1-4c3a-48f3-b25f-ea6d178a2418",
+      "name": "Answer Import",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        1184
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, received: $('Clean Imported Rows').all().length }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "ca78cecc-d941-495f-a615-434783d4c26f",
+      "name": "Not Imported Yet?",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        1376
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wamid",
+              "keyValue": "={{ $('Clean Imported Rows').item.json.wamid }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "9718d01e-f9c1-4cd3-9ff8-03a2afedd9ae",
+      "name": "Add Imported Rows",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        1376
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Cql2asOYThN8DQAY",
+          "cachedResultName": "wa_messages"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "wamid": "={{ $json.wamid }}",
+            "direction": "={{ $json.direction }}",
+            "phone_number_id": "={{ $json.phone_number_id }}",
+            "contact": "={{ $json.contact }}",
+            "contact_name": "={{ $json.contact_name }}",
+            "type": "={{ $json.type }}",
+            "text": "={{ $json.text }}",
+            "status": "={{ $json.status }}",
+            "error": "={{ $json.error }}",
+            "source": "twilio-import",
+            "media_mime": "={{ $json.media_mime }}",
+            "routed_to": "none",
+            "at": "={{ $json.at }}",
+            "updated_ms": "={{ $json.updated_ms }}"
+          },
+          "schema": [
+            {
+              "id": "wamid",
+              "type": "string"
+            },
+            {
+              "id": "direction",
+              "type": "string"
+            },
+            {
+              "id": "phone_number_id",
+              "type": "string"
+            },
+            {
+              "id": "contact",
+              "type": "string"
+            },
+            {
+              "id": "contact_name",
+              "type": "string"
+            },
+            {
+              "id": "type",
+              "type": "string"
+            },
+            {
+              "id": "text",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "type": "string"
+            },
+            {
+              "id": "media_mime",
+              "type": "string"
+            },
+            {
+              "id": "routed_to",
+              "type": "string"
+            },
+            {
+              "id": "at",
+              "type": "string"
+            },
+            {
+              "id": "updated_ms",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {
+          "optimizeBulk": true
+        }
+      }
+    },
+    {
+      "id": "937f2ad6-00d6-420e-9d98-a7427bef3e7b",
+      "name": "Sticky Note 2c6dd0a6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -96
+      ],
+      "parameters": {
+        "content": "## WhatsApp Hub · Inbox API\nWhat the WhatsApp Inbox app on the laptop talks to. Every call needs the `X-Inbox-Key` header (n8n credential *Inbox Key*). Only Azolute's own number.\n\n- `GET /webhook/wa-inbox/messages?since=<ms>&limit=<≤1000>` → `{rows, next}`\n- `POST /webhook/wa-inbox/send` `{to, text}` → `{ok, row}` or `{ok:false, error}`\n- `GET /webhook/wa-inbox/media?id=<media id>` → the file\n- `POST /webhook/wa-inbox/import` `{rows}` → `{ok, received}` (old Twilio chats; safe to repeat)\n\nSuccessful runs are not saved (the inbox polls every few seconds).",
+        "color": 5,
+        "width": 160,
+        "height": 224
+      }
+    }
+  ],
+  "connections": {
+    "GET messages": {
+      "main": [
+        [
+          {
+            "node": "Hub Settings (messages)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hub Settings (messages)": {
+      "main": [
+        [
+          {
+            "node": "Read Messages Since",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Messages Since": {
+      "main": [
+        [
+          {
+            "node": "Shape Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape Page": {
+      "main": [
+        [
+          {
+            "node": "Answer Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST send": {
+      "main": [
+        [
+          {
+            "node": "Hub Settings (send)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hub Settings (send)": {
+      "main": [
+        [
+          {
+            "node": "Read Send Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Send Request": {
+      "main": [
+        [
+          {
+            "node": "Number And Text?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Number And Text?": {
+      "main": [
+        [
+          {
+            "node": "Send Through Meta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer Bad Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Through Meta": {
+      "main": [
+        [
+          {
+            "node": "Log Sent Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer Send Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sent Reply": {
+      "main": [
+        [
+          {
+            "node": "Answer Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET media": {
+      "main": [
+        [
+          {
+            "node": "Hub Settings (media)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hub Settings (media)": {
+      "main": [
+        [
+          {
+            "node": "Ask Meta For The File Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Meta For The File Link": {
+      "main": [
+        [
+          {
+            "node": "Download The File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer File Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download The File": {
+      "main": [
+        [
+          {
+            "node": "Answer File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer File Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST import": {
+      "main": [
+        [
+          {
+            "node": "Hub Settings (import)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hub Settings (import)": {
+      "main": [
+        [
+          {
+            "node": "Clean Imported Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Imported Rows": {
+      "main": [
+        [
+          {
+            "node": "Answer Import",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Not Imported Yet?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Imported Yet?": {
+      "main": [
+        [
+          {
+            "node": "Add Imported Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "none",
+    "errorWorkflow": "M8FOdndi0Jfx2Qv6"
+  },
+  "pinData": {}
+}
