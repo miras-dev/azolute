@@ -11,12 +11,116 @@ business and, later, the clients' systems. The public site (`azolute.one`, this
 repo) stays the marketing site. The app is built so new features drop in as
 sections.
 
+## Two sides, one app
+
+- **Azolute admin** (Miras): every client, every automation, health and billing.
+- **Client portal**: each client logs in and sees only their own business
+  (their inbox, posts, bookings, reports). Same screens, filtered to one client.
+
+Everything is per client from day one (a `client` on every record), because
+the Content Engine and the WhatsApp Hub are already built that way
+(`content_settings` has one row per client; the Hub logs each number's
+`phone_number_id`).
+
 ## Features
 
-| # | Feature | Status | Notes |
+Status: **built** = the automation runs today (on n8n or elsewhere) and the app
+only needs to show and control it; **planned** = in the offer, not built yet.
+
+### Foundation (needed before anything else)
+
+| # | Feature | Automation behind it | Status |
 |---|---|---|---|
-| 1 | **WhatsApp inbox**: every message in and out of the Azolute WhatsApp Business number, read and reply | planned | First feature. Details below. |
-| … | (add more here, one row each) | | |
+| F1 | **Login and roles**: Azolute admin, client owner, client staff | — | planned |
+| F2 | **Clients**: add a client, their business details, which modules and plan (Starter / Growth / Full, Content Lite / Pro) they have | — | planned |
+| F3 | **Automation settings page** (see below): edit the values the n8n automations use, per client, instead of editing n8n tables | all n8n workflows | planned (idea) |
+| F4 | **Health**: what ran, what failed, last message received, alerts (today these are emails from *WhatsApp Hub · Alerts*) | Alerts workflow, n8n executions | built (email only) |
+
+### Messaging
+
+| # | Feature | Automation behind it | Status |
+|---|---|---|---|
+| 1 | **WhatsApp inbox**: every message in and out, reply, photos, contact names, 24-hour window | WhatsApp Hub + Inbox API | built (laptop app); app version planned |
+| 2 | **Templates**: the approved WhatsApp templates per number and their status | Meta WhatsApp Manager | planned |
+| 3 | **WhatsApp AI agent**: edit the "approved information" it answers from, see its conversations, take over a chat | the Hub's "everything else" slot | planned |
+| 4 | **Missed-call text-back**: log of missed calls and the WhatsApp sent | — | planned |
+| 5 | **AI phone receptionist**: call log, transcripts, bookings taken | — | planned |
+
+### Content Engine (for Azolute and for clients)
+
+| # | Feature | Automation behind it | Status |
+|---|---|---|---|
+| 6 | **Drafts queue**: every post waiting, with Approve / Edit / Skip in the app as well as on WhatsApp | Plan Post, Render & Preview, Owner Replies | built (WhatsApp only) |
+| 7 | **Brand settings**: voice, audience, themes, hashtags, image style, owner's WhatsApp | `content_settings` | built (table only) |
+| 8 | **Content calendar**: the month ahead, approved in the same flow | — | planned (Lite) |
+| 9 | **Published posts and performance**: links, reach, likes, best of the week | Owner Replies (publish) | partly built |
+| 10 | **Media library**: the owner's photos and generated images | `content_media`, Media Server | built (table only) |
+| 11 | **YouTube uploads**: owner's clips with title, description, tags, thumbnail | — | planned (Lite) |
+| 12 | **AI Reels / Shorts and monthly campaigns** | — | planned (Pro) |
+
+### Bookings and customers
+
+| # | Feature | Automation behind it | Status |
+|---|---|---|---|
+| 13 | **Bookings**: website bookings with Waiting / Confirmed / Declined, and Confirm / Decline in the app too | Toasty café script + Hub | built (café, Sheet) |
+| 14 | **Online booking and reminders**: calendar booking page, confirmations, reminders | Cal.com | partly built (Azolute's own) |
+| 15 | **No-show protection**: deposit / card-hold links | — | planned (Growth) |
+| 16 | **Review engine**: review requests after a visit; AI-drafted replies to approve | — | planned (Growth) |
+| 17 | **Retention engine**: QR opt-ins, offers by spend, win-back campaigns | — | planned (Full) |
+| 18 | **Contacts (light CRM)**: every message, call and booking becomes a contact with history | wa_messages, bookings | planned (Full) |
+| 19 | **Invoices and payment links** | — | planned (Full) |
+
+### Reports
+
+| # | Feature | Automation behind it | Status |
+|---|---|---|---|
+| 20 | **Owner's daily report**: configure and preview the morning WhatsApp / email (enquiries, leads, bookings, posts) | — | planned (Starter) |
+| 21 | **Monthly numbers for the quarterly review** | — | planned (Full) |
+
+### Running Azolute itself (admin only)
+
+| # | Feature | Automation behind it | Status |
+|---|---|---|---|
+| 22 | **Website leads**: contact form enquiries and site-chat conversations | Contact Intake, Site Chat (n8n) | built (email) |
+| 23 | **Client onboarding checklist**: Meta app, templates, credentials, first test, per client | the runbook steps | planned |
+| 24 | **Usage and costs per client**: messages sent and received (Meta charges per message), AI and image costs, against what they pay | wa_messages, provider bills | planned |
+| 25 | **Subscriptions and billing**: plan, setup fee, renewals | — | planned |
+
+## Phases (suggested)
+
+1. **Foundation + inbox:** F1–F4 and feature 1 (with the AWS message store).
+2. **Content and bookings:** 6, 7, 9, 10, 13, so the things already running can
+   be seen and controlled without n8n.
+3. **Everything else**, in the order clients buy it.
+
+## The automation settings page (F3)
+
+**The idea:** one page per client where Miras (and, for some fields, the
+client) fills in the values the automations need, instead of opening n8n's
+data tables. Today those values live in:
+
+- `content_settings` (n8n): brand voice, audience, themes, hashtags, image
+  style, owner's WhatsApp, WhatsApp phone number id, template name, Instagram
+  user id, Graph API version, media URL;
+- `hub_settings` (n8n): Azolute's phone number id, the café script address and
+  shared secret, Graph API version, alert email;
+- the café's Script Properties (Google Apps Script): provider, phone number id,
+  template names, café phone, approval on/off.
+
+**How it would work (to decide in the design session):**
+
+- Plain fields (names, templates, on/off switches) are edited in forms with
+  checks (a phone number must have a country code, a template must exist).
+- **Secrets are write-only:** tokens and shared secrets can be set or replaced,
+  never shown again; the page only says "set" or "not set". They stay in the
+  server-side store (n8n credentials or AWS Secrets Manager), never in the
+  browser.
+- Every change is logged (who, when, old value, new value).
+- **One source of truth:** either the app's database holds the settings and
+  n8n reads them through the app's API, or the app writes into n8n's tables
+  through n8n's API. The first is cleaner once the data moves to AWS.
+- A **"Test" button** per automation (send a test WhatsApp, make one post now)
+  so a change can be checked straight away.
 
 ## Feature 1: WhatsApp inbox
 
