@@ -1,0 +1,98 @@
+/* =============================================
+   German pages (de/): additions to azolute.css and demo.css
+   - fonts are self-hosted (no request to Google: German courts have
+     treated Google Fonts loaded from Google as a GDPR breach)
+   - a fixed header without the English nav, a legal footer,
+     the consent row of the call-back form and long-form legal text
+============================================== */
+
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/inter-400.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/inter-500.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/inter-600.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/space-grotesk-500.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/space-grotesk-600.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/space-grotesk-700.woff2") format("woff2"); }
+
+/* German words run long: let headings break instead of pushing the page wide */
+h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
+
+/* ---------- Header: brand + one button, always on a solid bar ---------- */
+.de-header {
+    background: rgba(7, 7, 13, 0.9);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.de-header .header-inner { gap: 1rem; min-height: 68px; }
+
+/* ---------- Footer: legal links ---------- */
+.de-footer {
+    border-top: 1px solid var(--line);
+    background: var(--bg-soft);
+    padding: 2.2rem 0;
+    font-size: 0.9rem;
+    color: var(--text-faint);
+}
+
+.de-footer .container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+}
+
+.de-footer nav { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; }
+.de-footer a { color: var(--text-soft); }
+.de-footer a:hover { color: var(--accent-soft); }
+
+/* ---------- Price card: one plan, centred ---------- */
+.de-plan { max-width: 34rem; }
+
+/* ---------- Call-back form: consent row ---------- */
+.contact-form .consent-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin: 0.4rem 0 1.2rem;
+}
+
+.contact-form .consent-row input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0.2rem 0 0;
+    padding: 0;
+    accent-color: var(--accent);
+}
+
+.contact-form .consent-row input[aria-invalid="true"] { outline: 2px solid rgba(255, 140, 120, 0.7); outline-offset: 2px; }
+
+.contact-form .consent-row label {
+    font-family: var(--font-body);
+    font-size: 0.86rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.5;
+    color: var(--text-soft);
+}
+
+.contact-form .consent-row a { color: var(--accent-soft); text-decoration: underline; }
+
+/* ---------- Legal pages ---------- */
+.legal { max-width: 72ch; }
+.legal h2 { font-size: 1.35rem; margin: 2.4rem 0 0.8rem; }
+.legal h3 { font-size: 1.05rem; margin: 1.6rem 0 0.5rem; }
+.legal p, .legal li { color: var(--text-soft); line-height: 1.7; }
+.legal ul { padding-left: 1.2rem; }
+.legal a { color: var(--accent-soft); text-decoration: underline; }
+
+.draft-note {
+    border: 1px solid rgba(255, 190, 90, 0.45);
+    background: rgba(255, 190, 90, 0.08);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-size: 0.9rem;
+}

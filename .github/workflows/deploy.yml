@@ -35,6 +35,7 @@ jobs:
             --exclude "img/landing/raw/*" \
             --exclude "img/landing2/raw/*" \
             --exclude "stash/*" \
+            --exclude "tests/*" \
             --exclude "*.html" \
             --exclude "*.log" \
             --exclude ".env*" \
@@ -50,6 +51,7 @@ jobs:
             --cache-control "no-cache, no-store, must-revalidate" \
             --content-type "application/json"
 
+      # German pages stay off the live site until launch: docs/de-launch-checklist.md
       - name: Deploy HTML files (no-cache)
         run: |
           aws s3 sync . s3://${{ secrets.S3_BUCKET }} \
@@ -59,6 +61,7 @@ jobs:
             --exclude ".git/*" \
             --exclude ".github/*" \
             --exclude "stash/*" \
+            --exclude "de/*" \
             --cache-control "no-cache, no-store, must-revalidate" \
             --content-type "text/html"
 
