@@ -1,0 +1,2204 @@
+{
+  "name": "Content Engine · Owner Replies",
+  "nodes": [
+    {
+      "id": "from-whatsapp-hub",
+      "name": "From WhatsApp Hub",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "caf21a55-6982-4248-93f6-81ce124b69cc",
+      "name": "Read Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        600
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "phone_number_id",
+              "type": "string",
+              "value": "={{ ($json.value ?? $json).metadata?.phone_number_id ?? '' }}"
+            },
+            {
+              "id": "r2",
+              "name": "from",
+              "type": "string",
+              "value": "={{ String(($json.value ?? $json).messages?.[0]?.from ?? '').replace(/\\D/g, '') }}"
+            },
+            {
+              "id": "r3",
+              "name": "msg_type",
+              "type": "string",
+              "value": "={{ ($json.value ?? $json).messages?.[0]?.type ?? 'none' }}"
+            },
+            {
+              "id": "r4",
+              "name": "text",
+              "type": "string",
+              "value": "={{ ($json.value ?? $json).messages?.[0]?.text?.body ?? '' }}"
+            },
+            {
+              "id": "r5",
+              "name": "payload",
+              "type": "string",
+              "value": "={{ (() => { const m = ($json.value ?? $json).messages?.[0] ?? {}; return m.button?.payload ?? m.interactive?.button_reply?.id ?? ''; })() }}"
+            },
+            {
+              "id": "r6",
+              "name": "image_id",
+              "type": "string",
+              "value": "={{ ($json.value ?? $json).messages?.[0]?.image?.id ?? '' }}"
+            },
+            {
+              "id": "r7",
+              "name": "image_note",
+              "type": "string",
+              "value": "={{ ($json.value ?? $json).messages?.[0]?.image?.caption ?? '' }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "3946fd12-b5d4-46be-a425-39c48e8dc2ad",
+      "name": "Work Out Action",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        600
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "action",
+              "type": "string",
+              "value": "={{ $json.payload ? $json.payload.split(':')[0] : ($json.msg_type === 'image' ? 'photo' : ($json.msg_type === 'text' ? 'text' : 'ignore')) }}"
+            },
+            {
+              "id": "a2",
+              "name": "post_id",
+              "type": "string",
+              "value": "={{ $json.payload ? $json.payload.split(':').slice(1).join(':') : '' }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "963b144f-0a99-4f7f-8daf-a3b6ac74d262",
+      "name": "Get Client",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        600
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "FgcxxifTQHm8YADN",
+          "cachedResultName": "content_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_phone_number_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.phone_number_id || '__none__' }}"
+            }
+          ]
+        },
+        "limit": 1
+      }
+    },
+    {
+      "id": "a979ca9c-b7e1-4e5d-a901-5b825ee821ef",
+      "name": "From The Owner?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        600
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "o1",
+              "leftValue": "={{ $('Work Out Action').first().json.from }}",
+              "rightValue": "={{ String($json.owner_whatsapp || '').replace(/\\D/g, '') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "o2",
+              "leftValue": "={{ $('Work Out Action').first().json.action }}",
+              "rightValue": "ignore",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "01f4d792-538c-44dd-8be4-912299517b5f",
+      "name": "Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1100,
+        600
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "approve",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Work Out Action').first().json.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "approve"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "edit",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Work Out Action').first().json.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "edit"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "skip",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Work Out Action').first().json.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "skip"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "text",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Work Out Action').first().json.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "text"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "photo",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Work Out Action').first().json.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "photo"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9244d45f-68de-4190-9277-deaa23839d43",
+      "name": "Get Post To Publish",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        120
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Work Out Action').first().json.post_id }}"
+            },
+            {
+              "keyName": "client_key",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Client').first().json.client_key }}"
+            }
+          ]
+        },
+        "limit": 1
+      }
+    },
+    {
+      "id": "9a0643a3-8217-42e9-a27c-c1f3ab6faddd",
+      "name": "Still Waiting?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1580,
+        120
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cp",
+              "leftValue": "={{ ['awaiting_approval', 'failed'].includes($json.status) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "0e51f911-9bc8-4a00-9297-43efbb5dee4d",
+      "name": "Mark Publishing",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1800,
+        40
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Post To Publish').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "publishing",
+            "error": ""
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "286df6d7-3da6-43ea-8c52-d91ec8283974",
+      "name": "Create Instagram Container",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        40
+      ],
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "={{ $('Get Client').first().json.graph_version || 'v25.0' }}",
+        "node": "={{ $('Get Client').first().json.ig_user_id }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $('Get Post To Publish').first().json.media_url }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('Get Post To Publish').first().json.caption }}"
+              },
+              {
+                "name": "alt_text",
+                "value": "={{ ($('Get Post To Publish').first().json.alt_text || '').slice(0, 1000) }}"
+              }
+            ]
+          }
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "39bba167-7cc5-44ae-a4ad-8f31d95ba2c9",
+      "name": "Let Instagram Fetch The Image",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        40
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 8,
+        "unit": "seconds"
+      },
+      "webhookId": "a279000c-ba9b-4ff5-9a64-5a22c24cf75c"
+    },
+    {
+      "id": "40eb69a3-0626-4063-9f2d-23ac602f4630",
+      "name": "Publish On Instagram",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        40
+      ],
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "={{ $('Get Client').first().json.graph_version || 'v25.0' }}",
+        "node": "={{ $('Get Client').first().json.ig_user_id }}",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $('Create Instagram Container').first().json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "b9d059d4-05a2-4f64-8f09-8eb96497863a",
+      "name": "Get Post Link",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2680,
+        40
+      ],
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "GET",
+        "graphApiVersion": "={{ $('Get Client').first().json.graph_version || 'v25.0' }}",
+        "node": "={{ $('Publish On Instagram').first().json.id }}",
+        "options": {
+          "fields": {
+            "field": [
+              {
+                "name": "permalink"
+              }
+            ]
+          }
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "044f902d-37ae-41df-a54b-856bc3a3e103",
+      "name": "Mark Published",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2900,
+        40
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Post To Publish').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "published",
+            "error": "",
+            "published_id": "={{ $('Publish On Instagram').first().json.id }}",
+            "permalink": "={{ $('Get Post Link').first().json.permalink || '' }}",
+            "published_at": "={{ $now.toISO() }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "published_id",
+              "displayName": "published_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "permalink",
+              "displayName": "permalink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "published_at",
+              "displayName": "published_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "54eb084e-f1ae-4ed5-96d4-0a1affdaf7a6",
+      "name": "Delete Published Image",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3120,
+        40
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "NrQdF12IGWYP5nca",
+          "cachedResultName": "content_media"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Post To Publish').first().json.post_id }}"
+            }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "9bf3e6a4-3f4f-4ad0-8d21-c03031cbcf47",
+      "name": "Tell Owner: Published",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        3340,
+        40
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "text",
+        "phoneNumberId": "={{ $('Get Client').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Client').first().json.owner_whatsapp }}",
+        "textBody": "=Published on Instagram ✅\n{{ $('Get Post Link').first().json.permalink || '' }}"
+      },
+      "executeOnce": true,
+      "webhookId": "11babec6-4954-4de8-a0d6-c5ef5628937c"
+    },
+    {
+      "id": "0f2853c8-c63a-495d-93e1-77a1aee83d5d",
+      "name": "Mark Publish Failed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2680,
+        260
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Post To Publish').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "failed",
+            "error": "={{ String($json.error?.message || $json.error?.description || $json.error || $json.message || 'Unknown error').slice(0, 500) }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "c093c226-1371-4379-8415-43bede0399f5",
+      "name": "Tell Owner: Already Handled",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1800,
+        260
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "text",
+        "phoneNumberId": "={{ $('Get Client').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Client').first().json.owner_whatsapp }}",
+        "textBody": "=That post is already {{ String($('Get Post To Publish').first().json.status || 'handled').replace('_', ' ') }}, so I left it as it is."
+      },
+      "webhookId": "7224a4be-a8e0-4bf1-b5f2-d26acf86ce20"
+    },
+    {
+      "id": "c8c3a932-8b9b-431c-a875-10291c52b85b",
+      "name": "Mark Awaiting Edit",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        420
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Work Out Action').first().json.post_id }}"
+            },
+            {
+              "keyName": "client_key",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Client').first().json.client_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "awaiting_edit"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b344a5d7-4ded-4a66-bdd2-26208ff22bb0",
+      "name": "Ask What To Change",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1580,
+        420
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "text",
+        "phoneNumberId": "={{ $('Get Client').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Client').first().json.owner_whatsapp }}",
+        "textBody": "What should change? Reply in your own words, for example:\n• shorter, and mention clinics\n• friendlier first line\n• new picture: a calendar filling up\n\nI'll send a fresh preview."
+      },
+      "executeOnce": true,
+      "webhookId": "961dd68a-ae74-4529-9afc-ea010afdf3c1"
+    },
+    {
+      "id": "e1aa3e5c-2846-4af5-a941-e427fc285b92",
+      "name": "Mark Skipped",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        600
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Work Out Action').first().json.post_id }}"
+            },
+            {
+              "keyName": "client_key",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Client').first().json.client_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "skipped"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "edbec5af-7538-4f50-a37f-4eaaeaac73da",
+      "name": "Delete Skipped Image",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1580,
+        600
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "NrQdF12IGWYP5nca",
+          "cachedResultName": "content_media"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Work Out Action').first().json.post_id }}"
+            }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ba9a3d28-0a3a-4452-9d64-20495bd082f5",
+      "name": "Tell Owner: Skipped",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1800,
+        600
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "text",
+        "phoneNumberId": "={{ $('Get Client').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Client').first().json.owner_whatsapp }}",
+        "textBody": "Skipped. Nothing was posted. The next draft arrives on the usual schedule."
+      },
+      "executeOnce": true,
+      "webhookId": "be5ce81a-a97d-4cb8-83cf-873a195e5a3f"
+    },
+    {
+      "id": "7d8304c9-777d-4aa1-9a99-c3a0b1f43da0",
+      "name": "Find Draft Being Edited",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        800
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "client_key",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Client').first().json.client_key }}"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "awaiting_edit"
+            }
+          ]
+        },
+        "limit": 1,
+        "orderBy": true,
+        "orderByColumn": "updatedAt",
+        "orderByDirection": "DESC"
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "8c63f517-13d3-4c08-8ce5-4f19d7b3768d",
+      "name": "Editing A Draft?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1580,
+        800
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ie",
+              "leftValue": "={{ $json.post_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "6cc2eb72-5dd9-4332-a767-1f89c0fa747c",
+      "name": "Revise Draft",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1800,
+        800
+      ],
+      "parameters": {
+        "promptType": "define",
+        "hasOutputParser": true,
+        "text": "=Current topic: {{ $json.topic }}\n\nCurrent caption:\n{{ $json.caption }}\n\nCurrent image description: {{ $json.image_prompt || '(owner photo, cannot be redrawn)' }}\n\nCurrent alt text: {{ $json.alt_text }}\n\nThe owner's change request:\n{{ $('Work Out Action').first().json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "=You revise a social post draft for {{ $('Get Client').first().json.brand_name }} exactly as the owner asks, keeping everything they did not ask to change. Make each requested change clearly visible: if they ask for shorter, cut the caption by at least a third; if they ask for a different tone or focus, rewrite the affected lines rather than swapping single words.\n\nVoice: {{ $('Get Client').first().json.brand_voice }}\n\nKeep these rules: no promised results or numbers presented as fact, no invented clients, quotes or statistics, hashtags at the end including {{ $('Get Client').first().json.base_hashtags }}, 8 hashtags at most, caption under 1,000 characters.\n\nSet new_image to true only if the owner asks for a different picture or visual. Then rewrite image_prompt as a scene description only (objects, arrangement, mood), with no colours, art style, text or faces, and write alt_text for the new picture. Otherwise return image_prompt and alt_text unchanged. If the post uses the owner's own photo (image description says so), new_image must be false."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3e5ee4d9-b406-4521-98af-b787abc63a70",
+      "name": "Claude (revise)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        1800,
+        1000
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 1500
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "5BXM2FyFTBAPI2LD",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "id": "73253358-75c0-428c-9723-0fec5a768c4a",
+      "name": "Revision Shape",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2000,
+        1000
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"topic\": { \"type\": \"string\" },\n    \"caption\": { \"type\": \"string\" },\n    \"image_prompt\": { \"type\": \"string\" },\n    \"alt_text\": { \"type\": \"string\", \"description\": \"One plain sentence describing the image as it will be after this revision\" },\n    \"new_image\": { \"type\": \"boolean\", \"description\": \"true only if the owner asked for a different picture\" }\n  },\n  \"required\": [\"topic\", \"caption\", \"image_prompt\", \"alt_text\", \"new_image\"]\n}"
+      }
+    },
+    {
+      "id": "ba828a46-cf57-4cbe-8b73-b6cee9654f4a",
+      "name": "Save Revision",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2100,
+        800
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Find Draft Being Edited').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "topic": "={{ $json.output.topic }}",
+            "caption": "={{ $json.output.caption }}",
+            "image_prompt": "={{ $('Find Draft Being Edited').first().json.source === 'owner_photo' ? '' : $json.output.image_prompt }}",
+            "owner_note": "={{ $('Work Out Action').first().json.text }}",
+            "status": "drafting",
+            "alt_text": "={{ $json.output.alt_text }}"
+          },
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "topic",
+              "id": "topic",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "caption",
+              "id": "caption",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "image_prompt",
+              "id": "image_prompt",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "owner_note",
+              "id": "owner_note",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "alt_text",
+              "id": "alt_text",
+              "required": false,
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5901c5ef-b46d-45d3-901b-8fce7d3fc41d",
+      "name": "Send Revised Preview",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2320,
+        800
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "7MMg2MhNJJQfXw3A",
+          "cachedResultName": "Content Engine · Render & Preview"
+        },
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "post_id": "={{ $('Find Draft Being Edited').first().json.post_id }}",
+            "regenerate_image": "={{ $('Find Draft Being Edited').first().json.source !== 'owner_photo' && $('Revise Draft').first().json.output.new_image === true }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "regenerate_image",
+              "displayName": "regenerate_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "56cfef01-8f23-4e02-a0af-8b71d8953717",
+      "name": "Tell Owner: How It Works",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1800,
+        1180
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "text",
+        "phoneNumberId": "={{ $('Get Client').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Client').first().json.owner_whatsapp }}",
+        "textBody": "This number runs your social posts.\n\n• Drafts arrive Mon, Wed and Fri with Approve / Edit / Skip.\n• To post your own picture, send the photo here with a short note as its caption (what it shows, anything to mention).\n• To change a draft, tap Edit first, then type what to change."
+      },
+      "webhookId": "5f31ff53-f663-4c11-af48-2253f4f25036"
+    },
+    {
+      "id": "d7ae9211-23ea-475c-9e48-6f2bca4232af",
+      "name": "Get Photo Link",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        1400
+      ],
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $('Work Out Action').first().json.image_id }}"
+      },
+      "webhookId": "17210566-b5e5-4d9a-8bd1-851e848b29d2"
+    },
+    {
+      "id": "b2b7a7cd-358b-47fc-808a-ccecba40dffd",
+      "name": "Download Photo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        1400
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "7c77d721-ef0e-4b2d-9780-e6de0f8704ab",
+      "name": "Read Photo Size",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        1400
+      ],
+      "parameters": {
+        "operation": "information"
+      }
+    },
+    {
+      "id": "cee8373b-efdd-4bc7-96e3-c8162ec47ada",
+      "name": "Crop To 4:5 JPEG",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 2,
+      "position": [
+        2020,
+        1400
+      ],
+      "parameters": {
+        "operation": "multiStep",
+        "operations": {
+          "operations": [
+            {
+              "operation": "resize",
+              "resizeOption": "ignoreAspectRatio",
+              "width": "={{ Math.ceil($json.size.width * Math.max(1080 / $json.size.width, 1350 / $json.size.height)) }}",
+              "height": "={{ Math.ceil($json.size.height * Math.max(1080 / $json.size.width, 1350 / $json.size.height)) }}"
+            },
+            {
+              "operation": "crop",
+              "width": 1080,
+              "height": 1350,
+              "positionX": "={{ Math.floor((Math.ceil($json.size.width * Math.max(1080 / $json.size.width, 1350 / $json.size.height)) - 1080) / 2) }}",
+              "positionY": "={{ Math.floor((Math.ceil($json.size.height * Math.max(1080 / $json.size.width, 1350 / $json.size.height)) - 1350) / 2) }}"
+            }
+          ]
+        },
+        "options": {
+          "format": "jpeg",
+          "quality": 88,
+          "fileName": "photo.jpg"
+        }
+      }
+    },
+    {
+      "id": "19c3aab4-9920-4a6f-ab42-169e4e6d31ee",
+      "name": "Photo To Base64",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        2240,
+        1400
+      ],
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "b64",
+        "options": {
+          "keepSource": "both"
+        }
+      }
+    },
+    {
+      "id": "a38a9da1-8dd7-4992-b8e5-11338471ff8d",
+      "name": "Write Caption For Photo",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2460,
+        1400
+      ],
+      "parameters": {
+        "promptType": "define",
+        "hasOutputParser": true,
+        "text": "=The owner's note with this photo: {{ $('Work Out Action').first().json.image_note || '(no note)' }}\n\nWrite the Instagram post for this photo.",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "=You write Instagram captions for {{ $('Get Client').first().json.brand_name }} from a photo the owner sent.\n\nVoice: {{ $('Get Client').first().json.brand_voice }}\n\nDescribe only what is really in the photo and in the owner's note. Do not invent products, prices, people, clients, quotes or results. Hook first (under 80 characters), 40 to 120 words, one soft call to action, then a blank line and hashtags including {{ $('Get Client').first().json.base_hashtags }}, 8 at most. Under 1,000 characters. topic: a 3-8 word label. alt_text: one plain sentence describing the photo."
+            },
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary",
+              "binaryImageDataKey": "data",
+              "imageDetail": "auto"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "583d88af-48c2-4b6e-af28-e8613cc760a6",
+      "name": "Claude (photo)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        2460,
+        1600
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 1500
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "5BXM2FyFTBAPI2LD",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "id": "58b3112c-78c3-4de0-8954-c8d2dc740a56",
+      "name": "Photo Post Shape",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2660,
+        1600
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"topic\": { \"type\": \"string\" },\n    \"caption\": { \"type\": \"string\" },\n    \"alt_text\": { \"type\": \"string\" }\n  },\n  \"required\": [\"topic\", \"caption\", \"alt_text\"]\n}"
+      }
+    },
+    {
+      "id": "8f054f2f-f060-4606-81c9-a045dd73ee76",
+      "name": "Save Photo Draft",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2760,
+        1400
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "client_key": "={{ $('Get Client').first().json.client_key }}",
+            "post_id": "={{ $('Get Client').first().json.client_key }}-{{ $now.toFormat('yyyyLLdd') }}-p{{ $execution.id }}",
+            "platform": "instagram",
+            "source": "owner_photo",
+            "status": "drafting",
+            "topic": "={{ $json.output.topic }}",
+            "caption": "={{ $json.output.caption }}",
+            "alt_text": "={{ $json.output.alt_text }}",
+            "owner_note": "={{ $('Work Out Action').first().json.image_note }}"
+          },
+          "schema": [
+            {
+              "id": "client_key",
+              "displayName": "client_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "platform",
+              "displayName": "platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alt_text",
+              "displayName": "alt_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "owner_note",
+              "displayName": "owner_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d1d1fb90-569a-4913-a15b-c240033ac5de",
+      "name": "Store Photo",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2980,
+        1400
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "NrQdF12IGWYP5nca",
+          "cachedResultName": "content_media"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "media_key": "={{ $('Save Photo Draft').first().json.post_id }}-{{ $now.toMillis() }}.jpg",
+            "post_id": "={{ $('Save Photo Draft').first().json.post_id }}",
+            "mime_type": "image/jpeg",
+            "b64": "={{ $('Photo To Base64').first().json.b64 }}"
+          },
+          "schema": [
+            {
+              "id": "media_key",
+              "displayName": "media_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mime_type",
+              "displayName": "mime_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "b64",
+              "displayName": "b64",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fc66bda0-a2ae-4a20-b791-124df3c62d8a",
+      "name": "Save Photo URL",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3200,
+        1400
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Save Photo Draft').first().json.post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "media_file": "={{ $('Store Photo').first().json.media_key }}",
+            "media_url": "={{ $('Get Client').first().json.media_base_url }}{{ $('Store Photo').first().json.media_key }}"
+          },
+          "schema": [
+            {
+              "id": "media_file",
+              "displayName": "media_file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "media_url",
+              "displayName": "media_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aea39237-1c43-4eb0-a743-8e6c18cfba10",
+      "name": "Send Photo Preview",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        3420,
+        1400
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "7MMg2MhNJJQfXw3A",
+          "cachedResultName": "Content Engine · Render & Preview"
+        },
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "post_id": "={{ $('Save Photo Draft').first().json.post_id }}",
+            "regenerate_image": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "regenerate_image",
+              "displayName": "regenerate_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "5d12e265-ac64-45ae-9e4c-0f85432af544",
+      "name": "Tell Owner: Publish Failed",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2900,
+        260
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "text",
+        "phoneNumberId": "={{ $('Get Client').first().json.wa_phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('Get Client').first().json.owner_whatsapp }}",
+        "textBody": "=Instagram didn't accept this post, so nothing went out.\nReason: {{ String($('Mark Publish Failed').first().json.error || 'unknown').slice(0, 300) }}\n\nTap Approve on the preview again to retry."
+      },
+      "executeOnce": true,
+      "webhookId": "4af9b33e-6f6c-4ef2-9ee0-32cd673495e7"
+    },
+    {
+      "id": "2d19ed8b-1ec2-4bd5-afa1-ad83555a7287",
+      "name": "Sticky Note cdb22c95",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        80
+      ],
+      "parameters": {
+        "content": "## Content Engine · Owner Replies\nCalled by the **WhatsApp Hub** for each message from a client's `owner_whatsapp` (the Hub owns the Meta webhook and logs every message). Only the owner's messages are acted on.\n\n- **Approve** → publish to Instagram (container → wait → publish → link), then delete the stored image.\n- **Edit** → asks what to change; the owner's next text is the edit note.\n- **Skip** → marks skipped, deletes the image.\n- **Text** while a draft is being edited → Claude revises it (new picture only if asked) and a fresh preview is sent.\n- **Photo** → cropped to 4:5, Claude writes the caption from the photo and note, preview sent.",
+        "color": 5,
+        "width": 760,
+        "height": 380
+      }
+    }
+  ],
+  "connections": {
+    "Read Message": {
+      "main": [
+        [
+          {
+            "node": "Work Out Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Work Out Action": {
+      "main": [
+        [
+          {
+            "node": "Get Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Client": {
+      "main": [
+        [
+          {
+            "node": "From The Owner?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "From The Owner?": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Get Post To Publish",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Awaiting Edit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Draft Being Edited",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Photo Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Post To Publish": {
+      "main": [
+        [
+          {
+            "node": "Still Waiting?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still Waiting?": {
+      "main": [
+        [
+          {
+            "node": "Mark Publishing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tell Owner: Already Handled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Publishing": {
+      "main": [
+        [
+          {
+            "node": "Create Instagram Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Instagram Container": {
+      "main": [
+        [
+          {
+            "node": "Let Instagram Fetch The Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Publish Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Let Instagram Fetch The Image": {
+      "main": [
+        [
+          {
+            "node": "Publish On Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish On Instagram": {
+      "main": [
+        [
+          {
+            "node": "Get Post Link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Publish Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Post Link": {
+      "main": [
+        [
+          {
+            "node": "Mark Published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Published": {
+      "main": [
+        [
+          {
+            "node": "Delete Published Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Published Image": {
+      "main": [
+        [
+          {
+            "node": "Tell Owner: Published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Publish Failed": {
+      "main": [
+        [
+          {
+            "node": "Tell Owner: Publish Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Awaiting Edit": {
+      "main": [
+        [
+          {
+            "node": "Ask What To Change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Skipped": {
+      "main": [
+        [
+          {
+            "node": "Delete Skipped Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Skipped Image": {
+      "main": [
+        [
+          {
+            "node": "Tell Owner: Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Draft Being Edited": {
+      "main": [
+        [
+          {
+            "node": "Editing A Draft?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editing A Draft?": {
+      "main": [
+        [
+          {
+            "node": "Revise Draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tell Owner: How It Works",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revise Draft": {
+      "main": [
+        [
+          {
+            "node": "Save Revision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (revise)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Revise Draft",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revision Shape": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Revise Draft",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Revision": {
+      "main": [
+        [
+          {
+            "node": "Send Revised Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Photo Link": {
+      "main": [
+        [
+          {
+            "node": "Download Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo": {
+      "main": [
+        [
+          {
+            "node": "Read Photo Size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Photo Size": {
+      "main": [
+        [
+          {
+            "node": "Crop To 4:5 JPEG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crop To 4:5 JPEG": {
+      "main": [
+        [
+          {
+            "node": "Photo To Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo To Base64": {
+      "main": [
+        [
+          {
+            "node": "Write Caption For Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Caption For Photo": {
+      "main": [
+        [
+          {
+            "node": "Save Photo Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (photo)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write Caption For Photo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo Post Shape": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Write Caption For Photo",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Photo Draft": {
+      "main": [
+        [
+          {
+            "node": "Store Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Photo": {
+      "main": [
+        [
+          {
+            "node": "Save Photo URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Photo URL": {
+      "main": [
+        [
+          {
+            "node": "Send Photo Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "From WhatsApp Hub": {
+      "main": [
+        [
+          {
+            "node": "Read Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,465 @@
+{
+  "name": "Content Engine · Plan Post",
+  "nodes": [
+    {
+      "id": "349f3d9d-9bbe-40bf-855d-995d264812fa",
+      "name": "Mon Wed Fri 10:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1,
+                3,
+                5
+              ],
+              "triggerAtHour": 10,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "efe8b006-0dea-4a52-9e0e-3c0ff9ae8778",
+      "name": "Get Active Clients",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "FgcxxifTQHm8YADN",
+          "cachedResultName": "content_settings"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "active",
+              "condition": "isTrue"
+            }
+          ]
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "0c6ce6aa-5247-452c-85ba-16f1cf7d236f",
+      "name": "Make One Now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d294dd95-f807-486a-a7a7-2bc6861fcb2a",
+      "name": "Get Recent Posts",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "limit": 60,
+        "orderBy": true,
+        "orderByColumn": "createdAt",
+        "orderByDirection": "DESC"
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "7a6de93a-1676-4586-b87c-1a5bd4085eb6",
+      "name": "Build Briefs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const clients = $('Get Active Clients').all().map(i => i.json);\nconst posts = $('Get Recent Posts').all().map(i => i.json).filter(p => p && p.post_id);\nconst stamp = $now.toFormat('yyyyLLdd');\nconst out = [];\nfor (const s of clients) {\n  const mine = posts.filter(p => p.client_key === s.client_key);\n  const waiting = mine.filter(p => ['drafting', 'awaiting_approval', 'awaiting_edit'].includes(p.status)).length;\n  if (waiting >= 3) continue;\n  const recent = mine.filter(p => p.topic).slice(0, 15).map(p => '- ' + p.topic);\n  out.push({ json: {\n    client_key: s.client_key,\n    post_id: s.client_key + '-' + stamp + '-' + Math.random().toString(36).slice(2, 8),\n    brand_name: s.brand_name,\n    brand_voice: s.brand_voice,\n    audience: s.audience,\n    themes: String(s.themes || '').split('|').map(t => '- ' + t.trim()).filter(t => t.length > 2).join('\\n'),\n    base_hashtags: s.base_hashtags,\n    recent_topics: recent.length ? recent.join('\\n') : '(none yet)',\n    today: $now.toFormat('cccc d LLLL yyyy')\n  } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "e96039d8-f95f-46ca-a74a-77cfed1b0322",
+      "name": "Write Post",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "hasOutputParser": true,
+        "text": "=Write the next Instagram post for {{ $json.brand_name }}.\n\nToday: {{ $json.today }}\n\nWho reads it:\n{{ $json.audience }}\n\nThemes to draw from (pick ONE, or an angle on it that fits today):\n{{ $json.themes }}\n\nTopics already used recently (do not repeat these angles):\n{{ $json.recent_topics }}\n\nHashtags that must close every caption: {{ $json.base_hashtags }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "=You write social posts for a small business, in its own voice.\n\nVoice: {{ $json.brand_voice }}\n\nRules for the caption:\n- First line is the hook: under 80 characters, no hashtags, no emoji at the start.\n- 60 to 140 words in total before the hashtags, in short paragraphs separated by a blank line.\n- Explain one concrete mechanism: what happens, step by step, for the business owner.\n- Never promise results, revenue, rankings or follower numbers. Any number must be clearly an example (\"say you miss five calls a week\").\n- Never invent clients, quotes, reviews or statistics.\n- End with one soft call to action (for example: book a 15-minute call, link in bio).\n- Then a blank line and the hashtags: the required ones plus 2 to 4 specific ones, 8 at most in total.\n- Whole caption under 1,000 characters.\n\nRules for image_prompt: describe only the content of one simple scene or visual metaphor for the post: the objects, how they are arranged, and the mood. Do NOT name colours, palettes, backgrounds, lighting or an art style; the brand's visual style is added separately and must not be contradicted. No words, letters, numbers, logos or screens with readable text in the image. No people's faces.\n\nalt_text: one plain sentence describing the illustration for screen readers."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "99018b64-69ba-4efd-9fea-2fa485c5378c",
+      "name": "Claude",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        900,
+        520
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 1500
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "5BXM2FyFTBAPI2LD",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "id": "e38654ce-ec40-447c-829d-32ad12008d2b",
+      "name": "Post Shape",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1100,
+        520
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"topic\": { \"type\": \"string\", \"description\": \"3-8 word label for the topic, used to avoid repeats\" },\n    \"caption\": { \"type\": \"string\", \"description\": \"The full Instagram caption including hashtags at the end\" },\n    \"image_prompt\": { \"type\": \"string\", \"description\": \"Scene description for the illustration, no text in the image\" },\n    \"alt_text\": { \"type\": \"string\", \"description\": \"One-sentence alt text describing the illustration\" }\n  },\n  \"required\": [\"topic\", \"caption\", \"image_prompt\", \"alt_text\"]\n}"
+      }
+    },
+    {
+      "id": "4aee97c3-8239-47ae-aab9-b0d99e3436ef",
+      "name": "Save Draft",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1140,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "RGzZbSzf1Ho4U9Ml",
+          "cachedResultName": "content_posts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "client_key": "={{ $('Build Briefs').item.json.client_key }}",
+            "post_id": "={{ $('Build Briefs').item.json.post_id }}",
+            "platform": "instagram",
+            "source": "ai_art",
+            "status": "drafting",
+            "topic": "={{ $json.output.topic }}",
+            "caption": "={{ $json.output.caption }}",
+            "image_prompt": "={{ $json.output.image_prompt }}",
+            "alt_text": "={{ $json.output.alt_text }}"
+          },
+          "schema": [
+            {
+              "id": "client_key",
+              "displayName": "client_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "platform",
+              "displayName": "platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_prompt",
+              "displayName": "image_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alt_text",
+              "displayName": "alt_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "15036d25-5423-47b4-8f38-5a2f2f81b776",
+      "name": "Render & Send Preview",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1360,
+        300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "7MMg2MhNJJQfXw3A",
+          "cachedResultName": "Content Engine · Render & Preview"
+        },
+        "mode": "each",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "post_id": "={{ $json.post_id }}",
+            "regenerate_image": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "regenerate_image",
+              "displayName": "regenerate_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "3d5f0c58-c4a8-413f-b89a-b98b1f9fcde6",
+      "name": "Sticky Note d2281492",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -140
+      ],
+      "parameters": {
+        "content": "## Content Engine · Plan Post\nMon, Wed, Fri at 10:00 (or **Make One Now**) for every active row in `content_settings`:\n\n1. Reads recent posts so Claude does not repeat a topic. A client with 3+ drafts still waiting for the owner is skipped, so unanswered previews never pile up.\n2. Claude writes topic, caption (+ hashtags), image brief and alt text in the brand voice.\n3. Saves the draft to `content_posts` and calls **Render & Preview**, which draws the image and sends the owner the WhatsApp preview.",
+        "color": 5,
+        "width": 700,
+        "height": 260
+      }
+    }
+  ],
+  "connections": {
+    "Mon Wed Fri 10:00": {
+      "main": [
+        [
+          {
+            "node": "Get Active Clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Clients": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make One Now": {
+      "main": [
+        [
+          {
+            "node": "Get Active Clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Posts": {
+      "main": [
+        [
+          {
+            "node": "Build Briefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Briefs": {
+      "main": [
+        [
+          {
+            "node": "Write Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Post": {
+      "main": [
+        [
+          {
+            "node": "Save Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write Post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Shape": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Write Post",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Draft": {
+      "main": [
+        [
+          {
+            "node": "Render & Send Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
