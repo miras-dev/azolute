@@ -5,6 +5,8 @@ Started 2026-11-24. The plan behind it: `docs/changes/2026-11-24-strategy-and-pr
 clients). Tick items here as they're done. Anything new that isn't on this list
 is checked against the strategy first.
 
+Your step-by-step guide, with links: `docs/your-steps.md`.
+
 Owner: **M** = Miras (needs your accounts, a signature or a live call),
 **C** = Claude (can be done from a chat), **M+C** = Claude prepares, Miras acts.
 
