@@ -2,25 +2,17 @@
   "name": "Content Engine · Owner Replies",
   "nodes": [
     {
-      "id": "e42f7539-3e95-4ea9-b338-f2f07919e1a8",
-      "name": "WhatsApp Message",
-      "type": "n8n-nodes-base.whatsAppTrigger",
-      "typeVersion": 1,
+      "id": "from-whatsapp-hub",
+      "name": "From WhatsApp Hub",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
       "position": [
         0,
-        600
+        0
       ],
       "parameters": {
-        "updates": [
-          "messages"
-        ],
-        "options": {
-          "messageStatusUpdates": [
-            "failed"
-          ]
-        }
-      },
-      "webhookId": "ae3fdd6f-d728-450e-9dc3-825112532ed6"
+        "inputSource": "passthrough"
+      }
     },
     {
       "id": "caf21a55-6982-4248-93f6-81ce124b69cc",
@@ -1744,7 +1736,7 @@
         80
       ],
       "parameters": {
-        "content": "## Content Engine · Owner Replies\nEvery WhatsApp message to the business number lands here. Only messages from the client's `owner_whatsapp` are acted on; anything else is ignored (it belongs to the future WhatsApp agent).\n\n- **Approve** → publish to Instagram (container → wait → publish → link), then delete the stored image.\n- **Edit** → asks what to change; the owner's next text is the edit note.\n- **Skip** → marks skipped, deletes the image.\n- **Text** while a draft is being edited → Claude revises it (new picture only if asked) and a fresh preview is sent.\n- **Photo** → cropped to 4:5, Claude writes the caption from the photo and note, preview sent.",
+        "content": "## Content Engine · Owner Replies\nCalled by the **WhatsApp Hub** for each message from a client's `owner_whatsapp` (the Hub owns the Meta webhook and logs every message). Only the owner's messages are acted on.\n\n- **Approve** → publish to Instagram (container → wait → publish → link), then delete the stored image.\n- **Edit** → asks what to change; the owner's next text is the edit note.\n- **Skip** → marks skipped, deletes the image.\n- **Text** while a draft is being edited → Claude revises it (new picture only if asked) and a fresh preview is sent.\n- **Photo** → cropped to 4:5, Claude writes the caption from the photo and note, preview sent.",
         "color": 5,
         "width": 760,
         "height": 380
@@ -1752,17 +1744,6 @@
     }
   ],
   "connections": {
-    "WhatsApp Message": {
-      "main": [
-        [
-          {
-            "node": "Read Message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Read Message": {
       "main": [
         [
@@ -2198,6 +2179,17 @@
         [
           {
             "node": "Send Photo Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "From WhatsApp Hub": {
+      "main": [
+        [
+          {
+            "node": "Read Message",
             "type": "main",
             "index": 0
           }
