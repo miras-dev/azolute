@@ -119,7 +119,7 @@ Everything in Lite, plus the AI creates the material:
 
 ### Production pipeline and unit economics
 
-Stills: gemini-2.5-flash-image (~$0.04/image). Video: Veo 3.1 Fast via the
+Stills: gemini-3.1-flash-lite-image (~$0.034/image). Video: Veo 3.1 Fast via the
 same Gemini API (~$0.10/second) animating our own stills (image-to-video
 keeps every clip on-brand); full Veo 3.1 (~$0.40/s) for the monthly hero
 piece; FFmpeg assembles clips + branded intro/end-card + captions, so only

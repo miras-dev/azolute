@@ -168,7 +168,7 @@
         "modelId": {
           "__rl": true,
           "mode": "id",
-          "value": "models/gemini-2.5-flash-image"
+          "value": "models/gemini-3.1-flash-lite-image"
         },
         "prompt": "={{ $('Get Post').first().json.image_prompt }}\n\nStyle: {{ $('Get Settings').first().json.image_style }}",
         "options": {

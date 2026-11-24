@@ -79,7 +79,7 @@ Content guardrails: real products use real photos (AI visuals are
 illustrative/brand-style only); platform AI-disclosure flags are set
 automatically.
 
-Production stack: gemini-2.5-flash-image for stills (~$0.04/image);
+Production stack: gemini-3.1-flash-lite-image for stills (~$0.034/image);
 Veo 3.1 Fast via the Gemini API (~$0.10/s) animating our own stills, full
 Veo (~$0.40/s) for hero pieces; FFmpeg assembly (only 8-12s generated per
 Reel, ~€2-4 per finished Reel); provider-agnostic n8n adapter with fal.ai

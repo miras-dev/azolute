@@ -62,7 +62,10 @@ template send, the Instagram publish, and the photo-to-post path
 
 1. **Gemini.** Create an API key in Google AI Studio. In n8n add a
    *Google Gemini (PaLM) API* credential, then select it on **Generate
-   Image** in Render & Preview. Model: `gemini-2.5-flash-image`.
+   Image** in Render & Preview. Model: `gemini-3.1-flash-lite-image`
+   (switched 24 Nov 2026: `gemini-2.5-flash-image` shuts down on 15 March
+   2027, and Google names this model as its replacement; about $0.034 per
+   image). Check the first picture it draws against the brand style.
 2. **WhatsApp Business Cloud API.** In Meta Business Manager, register the
    business number on the Cloud API (it cannot be the owner's own number:
    previews go *to* `owner_whatsapp`, currently `919207404868`). Create a
