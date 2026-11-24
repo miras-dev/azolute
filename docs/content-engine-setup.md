@@ -17,7 +17,7 @@ source of truth.
 |---|---|---|
 | Content Engine · Plan Post (`dJQEkHIlElhTMr14`) | Mon, Wed, Fri 10:00 (or **Make One Now**): for each active client, Claude writes topic, caption, image brief and alt text, avoiding recent topics. Saves the draft, then calls Render & Preview. Skips a client that already has 3+ drafts waiting. | Draft, not published |
 | Content Engine · Render & Preview (`7MMg2MhNJJQfXw3A`) | Sub-workflow. Draws the image with Gemini if needed, converts it to a 1080×1080 JPEG, stores it, and sends the owner the `content_review` WhatsApp template. | Draft, not published |
-| Content Engine · Owner Replies (`7b7LKdOUEbPPUctx`) | WhatsApp inbound. Approve publishes to Instagram; Edit asks what to change and Claude revises from the owner's next message; Skip discards; a photo sent with a note becomes a post (cropped to 4:5, caption written from the photo). Ignores anyone but the owner. | Draft, not published |
+| Content Engine · Owner Replies (`7b7LKdOUEbPPUctx`) | Called by the **WhatsApp Hub** (`IorCSvwB305dpU5g`) for each message from a client's owner; the Hub owns the Meta webhook and logs every message. Approve publishes to Instagram; Edit asks what to change and Claude revises from the owner's next message; Skip discards; a photo sent with a note becomes a post (cropped to 4:5, caption written from the photo). Ignores anyone but the owner. | Draft, not published |
 | Content Engine · Media Server (`OB4FHohps9OJxdh5`) | Public `GET /webhook/content-media?f=<key>` that serves stored images, so Instagram and WhatsApp can fetch them. | **Live** |
 
 Data tables (n8n → Data tables):
@@ -72,7 +72,11 @@ template send, the Instagram publish, and the photo-to-post path
      it on every WhatsApp node in Render & Preview and Owner Replies, and
      on **Download Photo**.
    - n8n credential *WhatsApp OAuth API* (app id + app secret): select it
-     on the **WhatsApp Message** trigger.
+     on the WhatsApp Hub's **WhatsApp In** trigger (Owner Replies no longer
+     has its own trigger: the Meta app has one webhook, and it's the Hub's).
+
+   The full order of steps for moving the business number off Twilio is in
+   `docs/whatsapp-cutover-runbook.md`; follow that instead of this item.
 3. **Template.** Create a message template, name `content_review`,
    language English (`en`):
    - Header: Image
@@ -96,8 +100,8 @@ template send, the Instagram publish, and the photo-to-post path
    three Instagram nodes in Owner Replies.
 5. **Settings row.** In `content_settings`, replace `SET_ME` in
    `wa_phone_number_id` and `ig_user_id`, and confirm `owner_whatsapp`.
-6. **Publish** in this order: Render & Preview, Owner Replies, then Plan
-   Post. Check the instance timezone first (Plan Post fires at 10:00 in
+6. **Publish** in this order: Render & Preview, Owner Replies, the WhatsApp
+   Hub, then Plan Post. Check the instance timezone first (Plan Post fires at 10:00 in
    it; set a timezone in the workflow's settings if needed).
 7. **First run.** Open Plan Post and click **Make One Now**. The preview
    arrives on WhatsApp; tap Edit, type a change, check the new preview,
