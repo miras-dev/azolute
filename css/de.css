@@ -14,7 +14,8 @@
 @font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/space-grotesk-700.woff2") format("woff2"); }
 
 /* German words run long: let headings break instead of pushing the page wide */
-h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
+/* (no automatic hyphenation: it split "WhatsApp" and "Reservierungen" mid-word) */
+h1, h2, h3 { overflow-wrap: break-word; hyphens: manual; }
 
 /* ---------- Header: brand + one button, always on a solid bar ---------- */
 .de-header {

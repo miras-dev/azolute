@@ -131,3 +131,48 @@ test('keeps the form when the webhook fails', async () => {
     assert.equal(await page.isEnabled('#callbackForm button[type="submit"]'), true);
     await page.close();
 });
+
+// ---- Final-review fixes ----
+
+test('internal links work without clean URLs', async () => {
+    // CloudFront serves S3 without index rewriting: "./" and "/de/" return 403.
+    for (const path of PAGES) {
+        const { page } = await open(path);
+        const hrefs = await page.$$eval('a[href]', (as) => as.map((a) => a.getAttribute('href')));
+        const bare = hrefs.filter((h) => /^\.\/(#.*)?$/.test(h) || /^\/de\/?(#.*)?$/.test(h));
+        assert.deepEqual(bare, [], path);
+        await page.close();
+    }
+});
+
+test('the form never puts details in the address', async () => {
+    const { page } = await open('de/index.html');
+    assert.equal((await page.getAttribute('#callbackForm', 'method') || '').toLowerCase(), 'post');
+    await page.close();
+});
+
+test('promises no confirmation email and no inbox', async () => {
+    const { page } = await open('de/index.html');
+    const text = await page.textContent('body');
+    assert.ok(!/E-Mail unterwegs|Bestätigung per E-Mail/.test(text), 'confirmation email promised');
+    assert.ok(!/Posteingang/.test(text), 'inbox promised');
+    await page.close();
+});
+
+test('makes no blanket claim that all data stays in the EU', async () => {
+    const { page } = await open('de/index.html');
+    const text = await page.textContent('body');
+    assert.ok(!/Verarbeitung in der EU|in der EU verarbeitet/.test(text));
+    await page.close();
+    const ds = await open('de/datenschutz.html');
+    assert.ok((await ds.page.textContent('body')).includes('Drittländer'));
+    await ds.page.close();
+});
+
+test('headlines are not hyphenated', async () => {
+    const { page } = await open('de/index.html', { viewport: { width: 360, height: 800 } });
+    for (const sel of ['h1', 'h2']) {
+        assert.equal(await page.$eval(sel, (el) => getComputedStyle(el).hyphens), 'manual', sel);
+    }
+    await page.close();
+});

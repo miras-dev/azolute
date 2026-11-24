@@ -10,7 +10,7 @@
         384
       ],
       "parameters": {
-        "content": "## Azolute · Rückruf (DE)\nThe call-back form on **azolute.one/de/** posts here.\n\n1. A filled honeypot (`website`) is answered OK and dropped.\n2. Without consent, a phone, a name or an email: 400, nothing stored.\n3. Otherwise the request and the **exact consent wording and time** go into `callback_requests` (the proof that a call is allowed, UWG § 7), the browser gets OK, Miras gets an email and the sender a German acknowledgement. Mail failures never lose the stored row.\n\nUnpublished until launch: docs/de-launch-checklist.md",
+        "content": "## Azolute · Rückruf (DE)\nThe call-back form on **azolute.one/de/** posts here.\n\n1. A filled honeypot (`website`) is answered OK and dropped.\n2. Without consent, one valid email address, a real phone number or a name: 400, nothing stored.\n3. Otherwise the request and the **exact consent wording and time** go into `callback_requests` (the proof that a call is allowed, UWG § 7), the browser gets OK and Miras gets an email.\n\nNo email goes to the address in the form (it would let anyone send mail from Miras's address). Successful runs are not saved, so deleting a row deletes the request.\n\nUnpublished until launch: docs/de-launch-checklist.md",
         "color": 5,
         "width": 620,
         "height": 300
@@ -93,7 +93,7 @@
           },
           "conditions": [
             {
-              "leftValue": "={{ $json.body.consent === true && String($json.body.email || '').includes('@') && String($json.body.phone || '').trim().length > 0 && String($json.body.name || '').trim().length > 0 && String($json.body.consent_text || '').trim().length > 0 }}",
+              "leftValue": "={{ $json.body.consent === true && /^[^\\s@,;<>()\"']+@[^\\s@,;<>()\"']+\\.[^\\s@,;<>()\"']+$/.test(String($json.body.email || '').trim()) && String($json.body.email || '').trim().length <= 200 && /^\\+?\\d{6,15}$/.test(String($json.body.phone || '').replace(/\\(0\\)/g, '').replace(/[\\s\\-\\/().]/g, '')) && String($json.body.name || '').trim().length > 0 && String($json.body.consent_text || '').trim().length > 0 }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -280,30 +280,6 @@
       }
     },
     {
-      "name": "Acknowledge In German",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        1344,
-        96
-      ],
-      "onError": "continueRegularOutput",
-      "credentials": {
-        "smtp": {
-          "id": "JU7W8yNmqyToDIQZ",
-          "name": "SMTP account"
-        }
-      },
-      "parameters": {
-        "fromEmail": "Miras von Azolute <miras@azolute.one>",
-        "toEmail": "={{ $('Save Request').item.json.email }}",
-        "subject": "Ihre Rückruf-Anfrage bei Azolute",
-        "emailFormat": "text",
-        "text": "={{ 'Guten Tag ' + $('Save Request').item.json.name.slice(0, 100) + ',\\n\\nvielen Dank für Ihre Anfrage. Ich rufe Sie wie gewünscht an' + ($('Save Request').item.json.best_time ? ' (' + $('Save Request').item.json.best_time.slice(0, 100) + ')' : '') + ' und zeige Ihnen den Buchungsdesk.\\n\\nSie haben eingewilligt, dass wir Sie zu Ihrer Anfrage anrufen oder anschreiben. Sie können diese Einwilligung jederzeit widerrufen: Eine kurze Antwort auf diese E-Mail genügt.\\n\\nViele Grüße\\nMiras\\nAzolute\\nhttps://azolute.one/de/' }}",
-        "options": {}
-      }
-    },
-    {
       "name": "Respond 400",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
@@ -389,25 +365,15 @@
           }
         ]
       ]
-    },
-    "Notify Miras": {
-      "main": [
-        [
-          {
-            "node": "Acknowledge In German",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none"
   },
   "meta": {
     "n8nWorkflowId": "g6aCvYQvXV608TYn",
     "dataTable": "callback_requests (oyOxvgiGgATXEcRt)",
-    "note": "Exported 2026-11-24. Unpublished until launch (docs/de-launch-checklist.md). Credentials are referenced by id only; no secrets."
+    "note": "Exported 2026-11-24, updated after the final review (no auto-reply, strict checks, successful runs not saved). Unpublished until launch (docs/de-launch-checklist.md). Credentials are referenced by id only; no secrets."
   }
 }
