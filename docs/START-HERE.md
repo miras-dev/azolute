@@ -123,7 +123,7 @@ State checked live on 24 Nov 2026:
 | Content Engine · Render & Preview | `7MMg2MhNJJQfXw3A` | no (sub-workflow) | `docs/n8n/content-engine-render-preview.json` |
 | Content Engine · Media Server | `OB4FHohps9OJxdh5` | **yes** | `docs/n8n/content-engine-media-server.json` |
 | Azolute Site Chat | `BNbSX6whgbJNrmA7` | **yes** | `docs/n8n/azolute-site-chat.json` (matches live, 24 Nov) |
-| Azolute Contact Intake | `FK6950GDFlPL3Ur8` | **yes** | `docs/n8n/azolute-contact-intake.json` |
+| Azolute Contact Intake | `FK6950GDFlPL3Ur8` | **yes** | `docs/n8n/azolute-contact-intake.json` (matches live, 24 Nov) |
 
 Data tables: `wa_messages` (`Cql2asOYThN8DQAY`, the message log; Meta keeps
 none), `hub_settings` (`SzK9AOIHvuDsOEGi`, values still `SET_ME`),
@@ -135,8 +135,12 @@ Notes from the 24 Nov check:
 - The Content Engine exports match the latest saved n8n versions. Owner
   Replies also has the Alerts workflow as its error workflow; that setting was
   added to its export.
-- Contact Intake doesn't allow MCP access, so it couldn't be compared with
-  its export. Site Chat now allows it, and its export was refreshed on 24 Nov.
+- Site Chat and Contact Intake now allow MCP access, so every Azolute
+  workflow can be read and edited from Claude. Both exports were compared and
+  refreshed on 24 Nov. Contact Intake's logic already matched; only canvas
+  positions changed. Its webhook still accepts requests from any site
+  (`allowedOrigins: *`), unlike Site Chat (azolute.one only); the honeypot
+  field and email check filter spam.
 - The Hub, Inbox API and Alerts have no git export yet.
 
 ### Other repos in this work
@@ -173,9 +177,7 @@ Notes from the 24 Nov check:
 3. Decide who owns the café's WhatsApp sending (the research says each client
    owns its own account) before the café's paid plan starts.
 4. Approve or change the app.azolute.one phase 1 design.
-5. Optional: allow MCP access on Contact Intake (`FK6950GDFlPL3Ur8`) so its
-   export can be checked.
-6. Business set-up: Udyam registration; shortlist a Steuerberater and get IT
+5. Business set-up: Udyam registration; shortlist a Steuerberater and get IT
    liability quotes.
 
 **Build (Claude), December 2026**

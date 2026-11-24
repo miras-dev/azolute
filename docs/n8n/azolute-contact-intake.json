@@ -16,7 +16,7 @@
       "typeVersion": 2,
       "position": [
         0,
-        0
+        80
       ],
       "webhookId": "azolute-contact"
     },
@@ -58,8 +58,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        220,
-        0
+        224,
+        80
       ]
     },
     {
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        440,
-        -80
+        448,
+        0
       ]
     },
     {
@@ -94,8 +94,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        660,
-        -80
+        672,
+        0
       ],
       "onError": "continueRegularOutput"
     },
@@ -110,7 +110,7 @@
       "typeVersion": 1.1,
       "position": [
         880,
-        -80
+        0
       ]
     },
     {
@@ -123,8 +123,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        440,
-        120
+        448,
+        208
       ]
     }
   ],
