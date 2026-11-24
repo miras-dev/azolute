@@ -196,7 +196,7 @@ Nothing live was touched (the business number isn't on your app yet).
 | B1 | **Meta, Path 1:** subscribe your app to the number's Messaging account. In Terminal: `curl -X POST "https://graph.facebook.com/v23.0/<WABA_ID>/subscribed_apps" -H "Authorization: Bearer <token>"` (paste the token only into Terminal). Path 2: add the number to your app in WhatsApp Manager as Meta offers. | Answer `{"success":true}`. `curl "https://graph.facebook.com/v23.0/<WABA_ID>/subscribed_apps" -H "Authorization: Bearer <token>"` lists your app. | `curl -X DELETE` the same URL. |
 | B2 | n8n `hub_settings`: `azolute_phone_number_id` = the **business number's** Phone number ID. `content_settings`: `wa_phone_number_id` = the same. | — | Put the test number's id back. |
 | B3 | From your phone, message **+91 94003 34868** "test". | A row in `wa_messages` with that number id. (Twilio may still get a copy too; that's fine.) | — |
-| B4 | **Café:** Script Properties → add `WHATSAPP_PROVIDER` = `meta`, `META_WA_TOKEN` = the token, `META_WA_PHONE_NUMBER_ID` = the business number's id, `OWNER_TEMPLATE` = `toasty_new_submission`, `TEMPLATE_LANG` = `en`. Run **setup**, then **testWhatsApp**. | setup says "WhatsApp through Meta … All settings present"; the café owner gets the alert from Azolute AI. Then make one test booking on the website: row in the Sheet, email, WhatsApp. | Set `WHATSAPP_PROVIDER` = `twilio`. |
+| B4 | **Café:** first, in WhatsApp Manager → Message templates, check the exact name and language code of the owner alert template (one made through Twilio may be `en_US`, not `en`). Then Script Properties → add `WHATSAPP_PROVIDER` = `meta`, `META_WA_TOKEN` = the token, `META_WA_PHONE_NUMBER_ID` = the business number's id, `OWNER_TEMPLATE` = that template's name, `TEMPLATE_LANG` = its language code. If `CUSTOMER_CONFIRMATION` is `true` today, also set `CONFIRMATION_TEMPLATE` to the guest confirmation template's name (or set `CUSTOMER_CONFIRMATION` to `false`), otherwise every booking sends a guest message that fails. Run **setup**, then **testWhatsApp**. | setup says "WhatsApp through Meta … All settings present"; the café owner gets the alert from Azolute AI. Then make one test booking on the website: row in the Sheet, email, WhatsApp. | Set `WHATSAPP_PROVIDER` = `twilio`. |
 | B5 | **Inbox:** in `.env`, remove `INBOX_NUMBER` (or set `+919400334868`). Restart the inbox. | Your "test" message shows. Reply to it; it arrives. | `INBOX_SOURCE=twilio`. |
 | B6 | **Content Engine:** Plan Post → **Make One Now**, then publish `Content Engine · Plan Post`. | Preview arrives; Approve / Edit / Skip work. | Unpublish Plan Post. |
 | B7 | **ClashCWL:** AWS Lambda → both ClashCWL functions (collector and API) → Environment variables → delete `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`, `TWILIO_CONTENT_SID`, `WATCH_WHATSAPP_TO`, `TWILIO_FORWARD_URL`, `TWILIO_WEBHOOK_URL` (whichever exist). Save the values in your password manager first. | Legends admin → Watch list still works; alerts go to Discord. | Put the variables back. |
@@ -211,7 +211,7 @@ Until step C1, going back is: providers back to `twilio`, inbox `.env` back to
 |---|---|---|
 | C1 | after a quiet week | Business settings → the WhatsApp account and the Messaging account → **remove Twilio** as a partner. In Twilio, delete the WhatsApp sender only after that. |
 | C2 | then | Twilio: check nothing uses the US number (+1 754…, $1.15/month): no ClashCWL, café or inbox setting points at it, no SMS/voice webhooks you need. Then release it and close the Twilio account. |
-| C3 | when the café owner agrees | **Café Confirm / Decline:** Script Properties → `OWNER_APPROVAL` = `true`, `HUB_SECRET` = the `cafe_hub_secret` from `hub_settings`, `CAFE_PHONE` = the café's phone, and the four template names (`BOOKING_REQUEST_TEMPLATE` = `toasty_booking_request`, `GUEST_INTRO_TEMPLATE` = `toasty_intro`, `GUEST_CONFIRMED_TEMPLATE` = `toasty_booking_confirmed`, `GUEST_DECLINED_TEMPLATE` = `toasty_booking_declined`). Run **setup**. Make a test booking with your own number as the guest; tap Confirm. **Check:** you get the introduction, then the confirmation; the Sheet says Confirmed; the owner gets "Done: …". Undo: `OWNER_APPROVAL` = `false`. |
+| C3 | when the café owner agrees | **Dry run first:** with `HUB_SECRET` set (below) but `OWNER_APPROVAL` still off, ask Claude to send the café script a test tap for a booking that doesn't exist; the answer should be "I couldn't find that booking". That proves the Hub ↔ script link (Google's redirect included) before a real guest is involved. Then **Café Confirm / Decline:** Script Properties → `OWNER_APPROVAL` = `true`, `HUB_SECRET` = the `cafe_hub_secret` from `hub_settings`, `CAFE_PHONE` = the café's phone, and the four template names (`BOOKING_REQUEST_TEMPLATE` = `toasty_booking_request`, `GUEST_INTRO_TEMPLATE` = `toasty_intro`, `GUEST_CONFIRMED_TEMPLATE` = `toasty_booking_confirmed`, `GUEST_DECLINED_TEMPLATE` = `toasty_booking_declined`). Run **setup**. Make a test booking with your own number as the guest; tap Confirm. **Check:** you get the introduction, then the confirmation; the Sheet says Confirmed; the owner gets "Done: …". Undo: `OWNER_APPROVAL` = `false`. |
 | C4 | later | ClashCWL clean-up (separate job): remove its `/twilio/whatsapp` route and `twilio.mjs`, following its `AGENTS.md`. |
 
 ## Token rotation (if the token ever leaks or you regenerate it)
@@ -222,8 +222,15 @@ replace both, then revoke the old one in Business settings → System users.
 
 ## When something goes wrong
 
-- You get an email from "Azolute n8n" saying what failed. The message itself is
-  always safe in `wa_messages` first.
+- You get an email from "Azolute n8n" saying what failed. Incoming messages are
+  written to `wa_messages` before anything else is tried, so a failure further
+  along (routing, the café, the Content Engine) never loses the message. If the
+  Hub can't run at all (n8n down), Meta keeps retrying for up to 7 days.
+- If the café owner taps Confirm/Decline and the café script refuses or breaks,
+  the owner is told "I couldn't process that tap … please contact them
+  directly", and you get an email. If Meta later reports a guest message as
+  undelivered, the owner gets "The WhatsApp to … didn't arrive. Please call them
+  on …".
 - n8n down for a while: Meta retries deliveries for up to 7 days, so messages
   arrive late, not lost. Sends from the café keep working (they go straight to
   Meta).
